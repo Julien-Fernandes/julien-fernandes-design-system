@@ -65,8 +65,10 @@
    POURQUOI UNE COPIE VERSÉE, et pas `@import "tailwindcss/preflight.css"` : voir l'en-tête
    de `tokens/preflight.css`. En deux mots — écrire un specifier `tailwindcss/…` ici fait
    réclamer tout l'arbre CSS par le compilateur Tailwind, dont la résolution d'`@import`
-   AVALE le `@import url(https://fonts.googleapis.com/…)` du fichier de marque : la police
-   de texte du système n'est plus chargée, en dev comme en production. Et `tailwindcss` est
+   AVALE tout `@import url(https://…)` d'un fichier de marque qui charge sa police à
+   distance : la police de texte n'est plus chargée, en dev comme en production (la marque
+   de ce dépôt auto-héberge les siennes depuis la v0.23.0 ; une marque cliente peut encore
+   importer les siennes). Et `tailwindcss` est
    un peer OPTIONNEL : le reset du socle ne peut pas dépendre d'un paquet facultatif.
 
    CE QUE L'OMISSION COÛTAIT. `tokens/base.css` couvre box-sizing, html, body, h1→h4, p, a,

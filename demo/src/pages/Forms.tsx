@@ -17,7 +17,7 @@ export function FormsPage() {
 
   return (
     <div className="flex flex-col gap-space-7">
-      <Section title="Input" note="Rail de contrôle partagé, bordure 1.5px. Au focus, la bordure passe en --ring ET un halo de 3px apparaît — le halo compense en surface ce que --brand-via perd en contraste ; ce n'est pas un ornement. Un seul trait, pas deux contours : l'outline générique est neutralisé sur .ds-input. Jamais un pill.">
+      <Section title="Input" note="Rail de contrôle partagé, bordure 1.5px. Au focus, la bordure passe en --ring ET un halo de 3px apparaît — l'anneau tient son seuil de 3:1 depuis la v0.23.0, le halo reste ce qui le rend lisible d'un coup d'œil. Un seul trait, pas deux contours : l'outline générique est neutralisé sur .ds-input. Jamais un pill.">
         <Block label="Tailles">
           <Stack>
             <Input size="sm" placeholder="Petite — 2.375rem" />
@@ -154,6 +154,14 @@ export function FormsPage() {
           </Block>
           <Block label="Aujourd'hui" hint="Sans value, la vue s'ouvre sur le mois courant et le jour du jour est marqué (.is-today).">
             <Calendar />
+          </Block>
+        </Grid>
+        <Grid cols={2}>
+          <Block label="Pleine largeur — fluid" hint="v0.23.0. Le calendrier prend la largeur de son conteneur ; ses sept colonnes se la partagent, la hauteur des cases ne bouge pas. Le widget de réservation posé dans une carte.">
+            <Calendar fluid value={date} onChange={setDate} />
+          </Block>
+          <Block label="Aujourd'hui injecté — today" hint="v0.23.0. today fixe le jour marqué et le mois ouvert. Indispensable en rendu serveur : sans lui, « aujourd'hui » est le jour du BUILD, dans le fuseau du serveur. Ici, forcé au 15 mars 2027.">
+            <Calendar today={new Date(2027, 2, 15)} />
           </Block>
         </Grid>
       </Section>

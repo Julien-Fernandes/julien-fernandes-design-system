@@ -17,6 +17,22 @@ export interface CalendarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onC
   locale?: string;
   /** Strips the card chrome (used inside DatePicker's popover). */
   bare?: boolean;
+  /**
+   * PLEINE LARGEUR (v0.23.0) : le calendrier prend la largeur de son conteneur et ses sept
+   * colonnes se la partagent — un widget de réservation posé dans une carte. La hauteur
+   * des cases ne change pas.
+   */
+  fluid?: boolean;
+  /**
+   * « AUJOURD'HUI », INJECTABLE (v0.23.0). Il sert au marquage `is-today` et au mois
+   * affiché d'entrée quand aucune `value` n'est passée. Défaut : l'horloge de la machine
+   * au moment du rendu — le comportement d'avant.
+   * ⚠️ RENDU CÔTÉ SERVEUR : sans cette prop, « aujourd'hui » est le jour du BUILD (ou de la
+   * requête), dans le fuseau du SERVEUR, et l'hydratation chez le visiteur ne corrige pas
+   * les attributs divergents. Passez la date du jour du visiteur, ou montez le calendrier
+   * côté client seulement.
+   */
+  today?: Date;
 }
 
 const strip = (d?: Date | null): Date | null =>
@@ -25,9 +41,10 @@ const key = (d?: Date | null): string =>
   d ? d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate() : '';
 
 export function Calendar({
-  value, onChange, min, max, disabledDates = [], locale = 'fr-FR', bare = false, className = '', ...rest
+  value, onChange, min, max, disabledDates = [], locale = 'fr-FR', bare = false, fluid = false,
+  today: todayProp, className = '', ...rest
 }: CalendarProps): JSX.Element {
-  const today = strip(new Date())!;
+  const today = strip(todayProp ?? new Date())!;
   const [view, setView] = useState(() => { const b = value || today; return new Date(b.getFullYear(), b.getMonth(), 1); });
   useEffect(() => { if (value) setView(new Date(value.getFullYear(), value.getMonth(), 1)); }, [key(value)]);
   const fmtMonth = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' });
@@ -42,7 +59,7 @@ export function Calendar({
   const move = (m?: number, y?: number) => setView(v => new Date(v.getFullYear() + (y || 0), v.getMonth() + (m || 0), 1));
   const selKey = key(strip(value));
   return (
-    <div className={cn('ds-cal', bare && 'ds-cal--bare', className)} {...rest}>
+    <div className={cn('ds-cal', bare && 'ds-cal--bare', fluid && 'ds-cal--fluid', className)} {...rest}>
       <div className="ds-cal__head">
         <button type="button" className="ds-cal__nav" aria-label="Année précédente" onClick={() => move(0, -1)}><Icon name="chevrons-left" size="1rem" /></button>
         <button type="button" className="ds-cal__nav" aria-label="Mois précédent" onClick={() => move(-1, 0)}><Icon name="chevron-left" size="1rem" /></button>

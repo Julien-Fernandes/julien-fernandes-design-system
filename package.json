@@ -1,6 +1,6 @@
 {
   "name": "@julienfernandes/ds",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "description": "Design system Julien Fernandes — jetons, couche Tailwind v4 et primitives React.",
   "license": "UNLICENSED",
   "private": false,
@@ -11,7 +11,8 @@
   "files": [
     "dist",
     "src",
-    "docs"
+    "docs",
+    "!docs/AUDIT-SITE.md"
   ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -35,6 +36,7 @@
     },
     "./theme.css": "./src/styles/theme.css",
     "./app-scale.css": "./src/styles/app-scale.css",
+    "./fonts/*": "./src/styles/assets/fonts/*",
     "./package.json": "./package.json"
   },
   "scripts": {

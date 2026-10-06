@@ -110,8 +110,12 @@
    Le bouton FANTÔME (transparent) et le PRIMAIRE (dégradé) ne sont pas concernés — ni l'un
    ni l'autre ne porte --secondary. La doctrine couvre maintenant quatre familles : champ,
    barre d'onglets, menu déroulant, bouton secondaire. Une surface se lit à son écart avec
-   ce qui la porte, jamais dans l'absolu. */
-.ds-card .ds-btn--secondary,.ds-modal .ds-btn--secondary,.ds-actionsheet .ds-btn--secondary,.ds-dropdown .ds-btn--secondary,.ds-card .ds-icon-btn--secondary,.ds-modal .ds-icon-btn--secondary{background:var(--background)}
+   ce qui la porte, jamais dans l'absolu.
+   LA BARRE DE NAVIGATION EST UNE PORTEUSE — v0.23.0. `.ds-navbar` est en --secondary, la
+   couleur même du bouton secondaire : un « Retour » ou un burger posé dedans s'y fondait,
+   écart 1,000. Même réponse que la carte : --background. Couvre aussi le panneau du menu
+   replié, qui vit dans la barre et porte le même --secondary. */
+.ds-card .ds-btn--secondary,.ds-modal .ds-btn--secondary,.ds-actionsheet .ds-btn--secondary,.ds-dropdown .ds-btn--secondary,.ds-card .ds-icon-btn--secondary,.ds-modal .ds-icon-btn--secondary,.ds-navbar .ds-btn--secondary,.ds-navbar .ds-icon-btn--secondary{background:var(--background)}
 
 /* L'ÉCHAPPATOIRE À LA DÉDUCTION — le jumeau exact de .ds-input--on-card, et pour la même
    raison. La règle ci-dessus prévoit UN niveau d'imbrication : un bouton posé sur une carte.
@@ -303,6 +307,19 @@
 .ds-card--interactive:hover,.ds-card--interactive.is-hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
 .ds-card--interactive:active,.ds-card--interactive.is-active{transform:translateY(0);box-shadow:var(--shadow-sm)}
 .ds-card--interactive:focus-visible,.ds-card--interactive.is-focus{box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 35%,transparent)}
+/* LA CARTE-LIEN — v0.23.0 (`<Card href>`). La carte entière EST le lien : un seul <a>,
+   donc une seule cible au clavier et au lecteur d'écran — jamais un lien dans un lien
+   (le composant le signale en développement). Trois choses à neutraliser, toutes héritées
+   de la règle `a` du socle : la couleur de lien (la carte garderait tout son texte en
+   --primary-readable), sa dérive au survol, et l'affichage en ligne d'un <a>.
+   LE FOCUS. L'anneau est celui de la carte interactive (halo de 3px), posé ICI aussi pour
+   qu'une carte-lien `variant="default"` ne soit jamais sans focus visible. Le contour
+   du `a:focus-visible` de base est remplacé par un contour TRANSPARENT, pas retiré : en
+   mode contrastes forcés (Windows), les ombres disparaissent et c'est ce contour, rendu
+   dans la couleur système, qui reste. */
+.ds-card--link{display:block;color:var(--card-foreground);text-decoration:none}
+.ds-card--link:hover,.ds-card--link:active{color:var(--card-foreground)}
+.ds-card--link:focus-visible{color:var(--card-foreground);outline:2px solid transparent;outline-offset:2px;box-shadow:0 0 0 3px color-mix(in srgb,var(--ring) 35%,transparent)}
 .ds-card--feature{background:var(--grad-soft);border-color:color-mix(in srgb,var(--brand-from) 28%,transparent)}
 .ds-badge{display:inline-flex;align-items:center;gap:0.375rem;min-height:var(--badge-h);padding:0.25rem 0.6875rem;box-sizing:border-box;border-radius:var(--radius-pill);font-family:var(--font-body);font-size:0.78125rem;font-weight:var(--weight-semibold);line-height:1.3;white-space:nowrap}
 .ds-badge--dense{min-height:var(--badge-h-dense);padding-block:0.0625rem}
@@ -531,6 +548,42 @@
    seul jeton, un seul réflexe. La graisse reste le second signal. Contraste : écart
    assumé par la marque (3,2 sur --secondary), voir @a11y-assume dans son fichier. */
 .ds-navlink.is-active{color:var(--active);font-weight:var(--weight-semibold)}
+/* LE MENU REPLIÉ — v0.23.0, OPT-IN (`<Navbar menu>`). Sans la prop, rien de ce bloc ne
+   s'applique : aucun nœud ne porte ces classes, le DOM de la barre est celui d'hier.
+   Sous 64rem (ou à toute largeur avec `menu="always"`), les liens et le CTA quittent la
+   barre et un burger ouvre un PANNEAU. Le panneau est un `popover` NATIF, et c'est tout
+   l'intérêt : ouverture au clic sur le burger, fermeture par Échap ou par un clic à
+   l'extérieur, focus rendu au burger, burger annoncé « développé » — le NAVIGATEUR fait
+   tout, sans une ligne de JavaScript. La barre marche donc rendue côté serveur et jamais
+   hydratée (Astro, page statique).
+   ⚠️ L'AUTEUR GAGNE TOUJOURS SUR LE NAVIGATEUR : un `display` posé sur `.ds-navbar__menu`
+   AFFICHERAIT le panneau fermé (la règle du navigateur qui le cache n'est qu'une feuille
+   d'agent). Le `display` ne se pose donc QUE sur `:popover-open`.
+   LA POSITION. Un popover vit dans la couche du dessus, hors de la barre : il ne peut pas
+   se placer « sous son parent » par le flux. Repli universel : collé au haut de la
+   fenêtre, à --navbar-h — juste pour une barre collante, le cas de toute barre de site.
+   Là où l'ancrage CSS existe, il s'ancre au bas de SA barre (`anchor-name` posé en ligne
+   par le composant), ce qui le garde juste même si la barre n'est pas en haut de page. */
+.ds-navbar__burger{display:none}
+.ds-navbar__menu{position:fixed;top:var(--navbar-h);left:0;right:0;bottom:auto;width:auto;margin:0;max-height:calc(100dvh - var(--navbar-h));overflow:auto;box-sizing:border-box;padding:var(--space-4) var(--space-5) var(--space-5);border:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--secondary);color:var(--foreground);box-shadow:var(--shadow-md)}
+.ds-navbar__menu:popover-open{display:flex;flex-direction:column;gap:var(--space-3)}
+.ds-navbar__menu::backdrop{background:transparent}
+@supports (top:anchor(bottom)){
+  .ds-navbar__menu{top:anchor(bottom);left:anchor(left);right:anchor(right);border-top:0}
+}
+.ds-navbar__menu-links{display:flex;flex-direction:column;gap:var(--space-1)}
+.ds-navbar__menu-links .ds-navlink{padding-block:var(--space-3)}
+.ds-navbar__menu-foot{display:flex;flex-direction:column;gap:var(--space-3);padding-top:var(--space-2)}
+@media (width < 64rem){
+  .ds-navbar--menu .ds-navbar__links,.ds-navbar--menu .ds-navbar__cta-main{display:none}
+  .ds-navbar--menu .ds-navbar__burger{display:inline-flex}
+}
+@media (width >= 64rem){
+  .ds-navbar--menu:not(.ds-navbar--menu-always) .ds-navbar__menu{display:none}
+}
+.ds-navbar--menu-always .ds-navbar__links,.ds-navbar--menu-always .ds-navbar__cta-main{display:none}
+.ds-navbar--menu-always .ds-navbar__burger{display:inline-flex}
+.ds-navbar__cta-main{display:flex;align-items:center;gap:var(--space-3)}
 .ds-tabs{display:inline-flex;align-items:center;gap:var(--space-1);padding:var(--space-1);border-radius:var(--tabs-radius);min-height:var(--control-md);box-sizing:border-box;background:var(--secondary);border:1px solid var(--border)}
 .ds-tabs--on-card{background:var(--background)}
 .ds-tab{appearance:none;border:0;background:transparent;color:var(--text-muted);font-family:var(--font-body);font-size:var(--text-control);font-weight:var(--weight-semibold);padding:var(--space-2) var(--space-4);border-radius:var(--radius-sm);cursor:pointer;transition:background-color var(--duration-fast) var(--ease-standard),color var(--duration-fast) var(--ease-standard)}
@@ -570,12 +623,60 @@
 .ds-footer__col{display:flex;flex-direction:column;gap:var(--space-3)}
 .ds-footer__link{font-size:var(--text-caption);color:var(--text-secondary)}
 .ds-footer__social{display:flex;gap:var(--space-3);padding-bottom:var(--space-6)}
+/* LA LIGNE DU BAS — v0.23.0. Le slot `bottom` : mention légale, ©, liens de pied de
+   page. Le socle ne fournit que la ligne ; ce qu'elle dit appartient au projet. */
+.ds-footer__bottom{padding-bottom:var(--space-6);font-size:var(--text-caption);color:var(--text-muted)}
 
 /* ---------- separator ---------- */
 .ds-sep{border:0;margin:0;flex:none;height:1px;width:100%;background:var(--border)}
 .ds-sep--vertical{width:1px;height:auto;min-height:1.5rem;align-self:stretch}
 .ds-sep--label{display:flex;align-items:center;gap:var(--space-3);height:auto;background:none;font-family:var(--font-body);font-size:var(--text-caption);font-weight:var(--weight-semibold);color:var(--text-muted);white-space:nowrap}
 .ds-sep--label::before,.ds-sep--label::after{content:"";flex:1;height:1px;background:var(--border)}
+
+/* ---------- prose ---------- */
+/* LA TYPOGRAPHIE DE FLUX — v0.23.0, PROMUE DEPUIS UNE APP (GOVERNANCE, test 2).
+   Dashboard l'avait écrite chez lui (`@utility document-riche`, le corps de son éditeur)
+   en annonçant : « si une deuxième app réclame une typographie de prose complète, ce
+   sera un candidat pour le socle ». La deuxième est un site (pages légales, contenus
+   Markdown). C'est SA version qui sert de base, avec trois écarts :
+     · ce qui connaît l'éditeur de Dashboard RESTE chez lui — la liste de cases
+       (`[data-type='taskList']`), le `:focus` du champ éditable ;
+     · ajouts : la proximité titre → texte (--space-3 sous un titre, le titre colle à ce
+       qu'il annonce), l'écart entre deux puces, et le lien SOULIGNÉ — dans un flux, un
+       lien distingué par sa seule couleur ne l'est pas (WCAG 1.4.1) ;
+     · elle est une CLASSE en `layer(components)`, pas un `@utility` : elle se pose sur
+       un conteneur qui n'a rien d'autre, et un utilitaire passé à côté la surcharge.
+   ⚠️ DES SÉLECTEURS DESCENDANTS, JAMAIS ENFANTS — la leçon de Dashboard, payée deux
+   fois : un rendu Markdown ou un éditeur insère ses propres conteneurs entre les nœuds,
+   en nombre qu'on ne choisit pas. Seule exception, `> * + *`, qui ne nomme aucun
+   élément.
+   `.prose` (tokens/base.css) ne change PAS : il ne règle que l'interligne, et l'étendre
+   changerait le rendu de quiconque l'emploie déjà. */
+.ds-prose{line-height:var(--leading-prose)}
+.ds-prose>*+*{margin-top:var(--space-5)}
+.ds-prose :is(h1,h2,h3,h4){font-family:var(--font-display);font-weight:var(--heading-weight);text-transform:var(--heading-transform);line-height:var(--leading-heading)}
+.ds-prose :is(h1,h2){font-size:var(--text-heading);letter-spacing:var(--tracking-heading)}
+.ds-prose h3{font-size:var(--text-subheading);letter-spacing:var(--tracking-subheading)}
+.ds-prose h4{font-size:var(--text-heading-sm);letter-spacing:var(--tracking-heading-sm)}
+.ds-prose :is(h1,h2,h3,h4)+*{margin-top:var(--space-3)}
+.ds-prose :is(p,li,blockquote){line-height:var(--leading-prose)}
+.ds-prose :is(ul,ol){padding-left:var(--space-5);list-style:revert}
+.ds-prose li+li,.ds-prose li>:is(ul,ol){margin-top:var(--space-2)}
+.ds-prose strong{font-weight:var(--weight-semibold)}
+.ds-prose a{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:0.18em}
+/* Un trait posé DANS du texte se bat contre les lignes qui l'entourent, pas contre du
+   vide : 2px, un mélange d'encre et de filet. Ce n'est pas .ds-sep (1px, --border), qui
+   sépare deux blocs d'interface — autre objet, autre règle. */
+.ds-prose hr{border:0;border-top:2px solid color-mix(in srgb,var(--foreground) 35%,var(--border))}
+.ds-prose code{font-family:var(--font-mono);font-size:var(--text-body-sm);background:var(--secondary);padding:0.1em 0.35em;border-radius:var(--radius-xs)}
+.ds-prose blockquote{padding-left:var(--space-4);border-left:2px solid var(--border);color:var(--text-secondary)}
+.ds-prose pre{background:var(--secondary);padding:var(--space-4);border-radius:var(--radius-sm);overflow-x:auto}
+.ds-prose pre code{background:none;padding:0}
+/* Le tableau suit le CORPS du flux (`inherit`, jamais un palier nommé), et son bord
+   gauche tombe sur celui des paragraphes. `.ds-table` vit dans la même couche : ces
+   sélecteurs, plus spécifiques, gagnent sans rien recopier de ses filets. */
+.ds-prose table{width:100%;font-size:inherit;line-height:var(--leading-prose)}
+.ds-prose table :is(th,td):first-child{padding-left:0}
 
 /* ---------- spinner ---------- */
 /* La taille vient du créneau, comme l'icône — même propriété, même repli (voir LES
@@ -761,6 +862,15 @@
 .ds-cal__day.is-selected{background:var(--brand-gradient);color:var(--primary-foreground);font-weight:var(--weight-semibold)}
 .ds-cal__day:disabled{opacity:.35;cursor:not-allowed}
 .ds-cal__day:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+/* LE CALENDRIER PLEINE LARGEUR — v0.23.0 (`<Calendar fluid>`). Le calendrier par défaut
+   est une boîte en ligne de sept colonnes fixes (--cal-day) : posé dans une carte de
+   réservation, il flotte à gauche d'une colonne vide. En `fluid`, il prend la largeur de
+   son conteneur et ses SEPT colonnes se partagent l'espace ; la case garde sa hauteur
+   (--cal-day), seule sa largeur suit. Aucune mesure nouvelle. `minmax(0,1fr)` et non
+   `1fr` : un `1fr` nu refuserait de descendre sous la largeur de son contenu. */
+.ds-cal--fluid{display:flex;width:100%}
+.ds-cal--fluid .ds-cal__grid{grid-template-columns:repeat(7,minmax(0,1fr));justify-items:stretch}
+.ds-cal--fluid .ds-cal__wd,.ds-cal--fluid .ds-cal__day{width:100%}
 .ds-datepicker{position:relative;display:inline-block;width:100%}
 .ds-datepicker__trigger{display:flex;align-items:center;justify-content:space-between;gap:var(--space-3);text-align:left;cursor:pointer}
 .ds-datepicker__ph{color:var(--text-muted)}

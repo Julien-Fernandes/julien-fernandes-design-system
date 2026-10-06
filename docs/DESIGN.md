@@ -72,7 +72,7 @@ Quatre niveaux, pas sept. Au-delà, plus personne ne sait lequel choisir.
 | `--primary` | | LA couleur d'action. Un REMPLISSAGE, jamais une couleur de texte — et l'unique exception, les icônes DÉCORATIVES de marque : pastille d'état vide ou d'en-tête. Une icône se colore selon ce qu'elle PORTE, pas selon l'endroit où elle est |
 | `--primary-readable` | | le même accent, rendu LISIBLE : ≥ 4,5:1 sur les six surfaces. C'est lui que prennent les liens et toute icône PORTEUSE D'INFORMATION (erreur, jour courant, état) |
 | `--active` | | LA couleur de tout ce qui est ACTIF — icône active, texte actif, libellé d'onglet sélectionné, page courante, contour d'un bouton enfoncé. UN jeton, lu par toutes les règles d'actif du socle (`check-active.mjs` refuse toute autre couleur). Un rôle, pas un alias : mets-y ce que ta marque veut ; si ça ne tient pas 4,5:1 en texte, tu l'assumes par écrit (`@a11y-assume`) |
-| `--brand-via` | | l'arrêt médian du dégradé, employé seul : l'anneau de focus |
+| `--ring` | | l'anneau de focus. Un rôle, pas un alias : ≥ 3:1 sur la page, le seuil des indicateurs non textuels (`check-contrast.mjs` le mesure). La marque de ce dépôt y met l'aplat `--primary` depuis la v0.23.0 ; un arrêt du dégradé plus clair passerait sous le seuil |
 | `--destructive` / `--destructive-readable` | | même paire, pour le danger |
 | `--brand-from/via/to` | | les trois arrêts du dégradé signature. Pas de dégradé ? mets la même valeur dans les trois : tout continue de fonctionner, en aplat |
 

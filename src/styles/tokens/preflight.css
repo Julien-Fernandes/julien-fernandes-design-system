@@ -9,7 +9,8 @@
    1 · L'IMPORT DISTANT DE LA MARQUE DISPARAÎT. Écrire un specifier `tailwindcss/…` dans
        `core.css` fait RÉCLAMER tout l'arbre CSS par le compilateur Tailwind — et sa
        résolution d'`@import` ne laisse pas passer un `@import url(https://…)`. Or c'est
-       exactement par là que le fichier de marque charge sa police de texte :
+       exactement par là qu'un fichier de marque charge une police distante — celui de ce
+       dépôt le faisait pour DM Sans jusqu'à la v0.23.0 :
        `@import url('https://fonts.googleapis.com/css2?family=DM+Sans…')`. Mesuré, en dev
        ET dans le bundle de production : avec l'import direct, la règle disparaît de la
        feuille émise et DM Sans n'est jamais chargée. Le symptôme est un système qui rend

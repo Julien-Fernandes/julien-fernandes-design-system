@@ -83,6 +83,18 @@ export function BrandPage() {
             ))}
           </Grid>
         </Block>
+        <Block label="extent" hint="v0.23.0. Même dégradé de marque, redimensionné — aucune couleur écrite. section (défaut) = en pour-cent de la section · wide = 1,6 × plus large et plus haut · contained = plafonné à --container-shell, il reste sous la colonne de page sur grand écran. Rien ne déborde de la section, même sans overflow:hidden.">
+          {(['section', 'wide', 'contained'] as const).map(e => (
+            <div key={e} className="relative h-space-8 overflow-hidden rounded-xl border border-border bg-card p-space-5">
+              <Halo extent={e} />
+              <span className="relative mono text-caption text-text-muted">extent=&quot;{e}&quot;</span>
+            </div>
+          ))}
+          <div className="relative h-space-8 overflow-hidden rounded-xl border border-border bg-card p-space-5">
+            <Halo extent="wide" placement="top" />
+            <span className="relative mono text-caption text-text-muted">extent=&quot;wide&quot; placement=&quot;top&quot;</span>
+          </div>
+        </Block>
       </Section>
 
       <Section title="Avatar" note="Les portraits sont toujours des découpes, placées bas, halo derrière les épaules. Aucun portrait n'est fourni : sans src, le composant retombe sur le monogramme muté.">

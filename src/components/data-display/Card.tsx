@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { ElementType, HTMLAttributes, JSX, ReactNode } from 'react';
 import { cva } from 'class-variance-authority';
 
@@ -25,6 +26,12 @@ import { cva } from 'class-variance-authority';
 export interface CardHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   /** Header slot — gradient caps line above the title. */
   eyebrow?: ReactNode;
+  /**
+   * Le ton du sur-titre (v0.23.0). `brand` (défaut) = `.eyebrow`, le dégradé de marque ;
+   * `neutral` = `.overline`, le même gabarit à l'encre (`currentColor`) — le libellé de
+   * section d'une carte de réglages, d'une fiche. Un seul des deux par nœud, jamais les deux.
+   */
+  eyebrowTone?: 'brand' | 'neutral';
   /** Header slot — pass a <Pastille size="carte"> (or size="dialogue" in a Modal). */
   icon?: ReactNode;
   /** Header slot — display face, casse et graisse selon --heading-transform / --heading-weight, jamais sous 1.125rem. */
@@ -46,8 +53,8 @@ export interface CardHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
 }
 
 export function CardHeader({
-  eyebrow, icon, title, subtitle, action, titleSize = 'sm', headerGap = 'normal', flush = false,
-  className = '', ...rest
+  eyebrow, eyebrowTone = 'brand', icon, title, subtitle, action, titleSize = 'sm', headerGap = 'normal',
+  flush = false, className = '', ...rest
 }: CardHeaderProps): JSX.Element | null {
   /* Aucun slot passé = aucun noeud émis. C'est la condition de non-régression de Card :
      le DOM d'une Card sans en-tête est identique à celui d'avant la v0.4. */
@@ -70,7 +77,7 @@ export function CardHeader({
       {icon}
       {(eyebrow || title || subtitle) ? (
         <div className="ds-card__header-main">
-          {eyebrow ? <span className="eyebrow">{eyebrow}</span> : null}
+          {eyebrow ? <span className={eyebrowTone === 'neutral' ? 'overline' : 'eyebrow'}>{eyebrow}</span> : null}
           {title ? (
             <h3 className={['ds-card__title', titleSize === 'lg' ? 'ds-card__title--lg' : ''].filter(Boolean).join(' ')}>
               {title}
@@ -99,6 +106,8 @@ export interface CardProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
   flush?: boolean;
   /** Header slot — gradient caps line above the title. */
   eyebrow?: ReactNode;
+  /** Le ton du sur-titre — voir `CardHeaderProps.eyebrowTone`. Défaut `brand`. */
+  eyebrowTone?: 'brand' | 'neutral';
   /** Header slot — pass a <Pastille size="carte">. */
   icon?: ReactNode;
   /** Header slot — display face, casse et graisse selon --heading-transform / --heading-weight, jamais sous 1.125rem. */
@@ -112,8 +121,29 @@ export interface CardProps extends Omit<HTMLAttributes<HTMLElement>, 'title'> {
   /** normal = --space-4 gutter under the header · airy = --space-6, for a card of blocks. */
   headerGap?: 'normal' | 'airy';
   as?: keyof JSX.IntrinsicElements;
+  /**
+   * LA CARTE-LIEN (v0.23.0) : la carte ENTIÈRE devient un `<a href>` — une seule cible au
+   * clavier, au pointeur et au lecteur d'écran. Elle prend `variant="interactive"` si aucun
+   * variant n'est passé, et un anneau de focus visible quel que soit le variant.
+   * ⚠️ UN SEUL LIEN : ne posez AUCUN lien ni bouton à l'intérieur (un `<a>` dans un `<a>` est
+   * du HTML invalide, et deux cibles imbriquées ne s'atteignent pas au clavier). Le
+   * composant le signale en console en développement. Le texte du lien est le contenu de la
+   * carte : gardez-le court, un titre suffit au lecteur d'écran.
+   */
+  href?: string;
+  /** Avec `href` seulement. */
+  target?: string;
+  /** Avec `href` seulement — `noopener noreferrer` pour un `target="_blank"` externe. */
+  rel?: string;
   children?: ReactNode;
 }
+
+/* Même déclaration que dans ActionSheet : `process.env.NODE_ENV` est remplacé par le
+   bundler de l'app, le socle ne dépend pas des types de Node. */
+declare const process: { env: { NODE_ENV?: string } };
+
+/* Ce qu'une carte-lien ne doit pas contenir : tout ce qui est soi-même une cible. */
+const CIBLES = 'a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])';
 
 const card = cva('ds-card', {
   variants: {
@@ -125,19 +155,34 @@ const card = cva('ds-card', {
 });
 
 export function Card({
-  variant = 'default', size = 'md', as, flush = false,
-  eyebrow, icon, title, subtitle, action, titleSize = 'sm', headerGap = 'normal',
+  variant, size = 'md', as, flush = false, href, target, rel,
+  eyebrow, eyebrowTone = 'brand', icon, title, subtitle, action, titleSize = 'sm', headerGap = 'normal',
   className = '', children, ...rest
 }: CardProps): JSX.Element {
-  const Tag = (as ?? 'div') as ElementType;
-  const cls = [card({ variant, size, flush }), className].filter(Boolean).join(' ');
+  const Tag = (as ?? (href ? 'a' : 'div')) as ElementType;
+  const v = variant ?? (href ? 'interactive' : 'default');
+  const cls = [card({ variant: v, size, flush }), href ? 'ds-card--link' : '', className].filter(Boolean).join(' ');
+  /* Filet de développement : un lien ou un bouton DANS une carte-lien est une seconde
+     cible imbriquée — invalide, et inatteignable au clavier. Rien ne casse à l'écran :
+     sans ce signal, personne ne le voit. */
+  const ref = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production' || !href || !ref.current) return;
+    const imbrique = ref.current.querySelector(CIBLES);
+    if (imbrique) {
+      console.warn(
+        '[ds] Card href : la carte entière est déjà un lien, elle contient pourtant une autre cible ('
+        + imbrique.tagName.toLowerCase() + '). Retirez-la, ou retirez `href` et gardez le lien à l\'intérieur.',
+      );
+    }
+  }, [href]);
   return (
-    <Tag className={cls} {...rest}>
+    <Tag ref={ref} className={cls} {...(href ? { href, target, rel } : null)} {...rest}>
       {/* Une carte `flush` qui a un en-tête le rend À FILET : c'est la carte qui le
           sait, pas le site d'appel — même logique que l'alignement (v0.18.0). */}
       <CardHeader
-        eyebrow={eyebrow} icon={icon} title={title} subtitle={subtitle} action={action}
-        titleSize={titleSize} headerGap={headerGap} flush={flush}
+        eyebrow={eyebrow} eyebrowTone={eyebrowTone} icon={icon} title={title} subtitle={subtitle}
+        action={action} titleSize={titleSize} headerGap={headerGap} flush={flush}
       />
       {children}
     </Tag>

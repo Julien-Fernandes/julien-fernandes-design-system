@@ -114,9 +114,9 @@ marque, prise en connaissance de la mesure, et le remède est une ligne dans ce 
 |---|---|--:|--:|--:|
 | `texte courant sur --background` | 16 / 400 | 4,5 | 14,94 | 14,52 |
 | `texte courant sur --card` | 16 / 400 | 4,5 | 15,59 | 12,50 |
-| `--text-secondary sur --card` | 16 / 400 | 4,5 | 10,31 | 9,22 |
-| `.caption — --text-muted sur --card` | 13 / 500 | 4,5 | 5,12 | 6,47 |
-| `.ds-input::placeholder` | 15 / 400 | 4,5 | 5,17 | 6,47 |
+| `--text-secondary sur --card` | 16 / 400 | 4,5 | 10,31 | 11,83 |
+| `.caption — --text-muted sur --card` | 13 / 500 | 4,5 | 5,12 | 9,22 |
+| `.ds-input::placeholder` | 15 / 400 | 4,5 | 5,17 | 9,22 |
 | `.ds-tooltip__bubble` | 13 / 600 | 4,5 | 14,52 | 15,59 |
 | `a{} au repos sur --background` | 16 / 400 | 4,5 | 5,36 | 7,11 |
 | `a{} au repos sur --card` | 16 / 400 | 4,5 | 5,59 | 6,12 |
@@ -128,8 +128,8 @@ marque, prise en connaissance de la mesure, et le remède est une ligne dans ce 
 | `.ds-pastille--brand-solid — glyphe sur --brand-to` | icône | 3 | 3,80 | 3,80 |
 | `.ds-icon-btn[aria-pressed] — icône` | icône | 3 | 3,00 | 3,94 |
 | `.ds-icon-btn--accent — icône` | icône | 3 | 3,00 | 3,94 |
-| `.ds-rail__item au repos — icône --text-muted sur --secondary` | icône | 3 | 5,17 | 6,47 |
-| `.ds-kbd — --text-secondary sur --secondary` | 13 / 600 | 4,5 | 10,40 | 9,22 |
+| `.ds-rail__item au repos — icône --text-muted sur --secondary` | icône | 3 | 5,17 | 9,22 |
+| `.ds-kbd — --text-secondary sur --secondary` | 13 / 600 | 4,5 | 10,40 | 11,83 |
 | `.ds-error` | 13 / 500 | 4,5 | 6,62 | 6,07 |
 | `.ds-dropdown__item--danger` | 14 / 400 | 4,5 | 6,84 | 5,73 |
 | `.ds-actionsheet__item--danger` | 15 / 500 | 4,5 | 6,84 | 5,73 |
@@ -145,8 +145,9 @@ marque, prise en connaissance de la mesure, et le remède est une ligne dans ce 
 | `.ds-badge--success sur --background` | 12 / 700 | 4,5 | 4,75 | 7,14 |
 | `.ds-badge--neutral sur --card` | 12 / 700 | 4,5 | 5,20 | 7,46 |
 | `.ds-badge--neutral sur --background` | 12 / 700 | 4,5 | 5,00 | 8,78 |
-| `.ds-badge--outline` | 12 / 700 | 4,5 | 10,31 | 9,22 |
+| `.ds-badge--outline` | 12 / 700 | 4,5 | 10,31 | 11,83 |
 | `survol — --foreground sur --surface-alt` | 15 / 600 | 4,5 | 14,38 | 11,47 |
+| `anneau de focus --ring sur --background` | contour 2px | 3 | 3,12 | 4,79 |
 | `.ds-choice coché — aplat --primary` | contrôle | 3 | 3,12 | 4,79 |
 | `.ds-switch actif — piste --primary` | contrôle | 3 | 3,12 | 4,79 |
 | `.ds-progress__bar sur son rail` | graphique | 3 | 3,00 | 3,78 |
@@ -156,14 +157,16 @@ marque, prise en connaissance de la mesure, et le remède est une ligne dans ce 
 
 ## 3. Les écarts assumés
 
-19 paires. Chacune est déclarée **dans le fichier de marque**,
+18 paires. Chacune est déclarée **dans le fichier de marque**,
 `src/styles/brand-julien-fernandes.css`, par un bloc `@a11y-assume:` — pas dans le script.
 Le script porte la mécanique, la marque porte ses renoncements : un client qui écrit sa
 marque repart d'une liste VIDE et n'hérite d'aucune dérogation qu'il n'a pas prise. Le
-build tombe si une **vingtième** apparaît.
+build tombe si une **dix-neuvième** apparaît.
 
-Cinq familles, et les cinq sont des décisions de marque — aucune n'est un oubli. Deux ont
-été prises après le portage : l'anneau de focus (v0.8.0) et la couleur d'actif (v0.21.0).
+Quatre familles, et les quatre sont des décisions de marque — aucune n'est un oubli. Une a
+été prise après le portage : la couleur d'actif (v0.21.0). L'anneau de focus, assumé de la
+v0.8.0 à la v0.22.0, est sorti de la liste en v0.23.0 : il tient désormais son seuil
+(§ 3.4).
 
 | Paire | contenu | seuil | clair | sombre |
 |---|---|--:|--:|--:|
@@ -180,7 +183,6 @@ Cinq familles, et les cinq sont des décisions de marque — aucune n'est un oub
 | `.ds-btn--danger — label sur --destructive` | 15 / 600 | 4,5 | 3,80 ✗ | 3,80 ✗ |
 | `.ds-cal__day.is-selected` | 14 / 600 | 4,5 | 3,48 ✗ | 3,48 ✗ |
 | `.eyebrow / .accent — dégradé clippé en texte` | 12 / 600 | 4,5 | 1,83 ✗ | 8,16 |
-| `anneau de focus --ring sur --background` | contour 2px | 3 | 2,41 ✗ | 8,16 |
 | `.ds-input — bordure --input vs page` | contour 1.5px | 3 | 1,17 ✗ | 1,82 ✗ |
 | `.ds-input — bordure --input vs remplissage` | contour 1.5px | 3 | 1,23 ✗ | 1,57 ✗ |
 | `.ds-input — remplissage vs page` | aplat | 3 | 1,05 ✗ | 1,16 ✗ |
@@ -271,25 +273,22 @@ séparation. Le séparateur ne porte aucune information seule, et sa variante
 qui doit tenir 1.4.11 les remonte dans SON fichier de marque, sans ouvrir un fichier du
 socle, et vérifie d'un `node check-contrast.mjs` que les paires de contour passent 3:1.
 
-### 3.4 · L'anneau de focus — `2,41` en clair
+### 3.4 · L'anneau de focus — sorti des écarts en v0.23.0
 
-**L'écart.** `--ring` vaut `--brand-via` (`#f08029`), l'arrêt **médian** du dégradé, depuis
-la v0.8.0. Il mesure **2,41** sur la page, 2,51 sur la carte, 2,53 sur `--secondary`, 2,60
-sur le popover : sous le plancher de 3:1 des indicateurs non textuels, quelle que soit la
-porteuse. En sombre il reste `--brand-from` (`#f5a524`) et tient **8,16**.
+**Ce qu'il était.** De la v0.8.0 à la v0.22.0, `--ring` valait `--brand-via` (`#f08029`),
+l'arrêt médian du dégradé : **2,41** sur la page en clair, sous le plancher de 3:1 des
+indicateurs non textuels, compensé par le halo de 3 px du champ.
 
-**Pourquoi il est assumé.** Décision de marque, prise en connaissance de la mesure : la
-marque est plus présente sur un arrêt du dégradé que sur l'aplat, et c'est l'anneau de
-focus qui la porte le plus souvent à l'écran.
+**Ce qu'il est.** Décision de Julien du 06/10/2026, adoptée **parce que la mesure la
+valide** : `--ring` vaut l'aplat `--primary` (`#e85d2f`) dans les deux thèmes. Il tient
+**3,12** sur la page, 3,25 sur la carte, 3,28 sur `--secondary`, 3,37 sur le popover en
+clair ; **4,79** sur la page et 3,78 au plus bas (`--surface-alt`) en sombre. Seul
+`--muted` en clair reste juste sous le seuil (**2,96**, contre ~2,3 avant) — une surface où
+le focus ne porte jamais sur le seul bord.
 
-**Ce qui l'atténue, et il faut le garder.** Le focus du champ ne porte pas sur le seul bord.
-Il porte un bord de 1,5 px **en plus** d'un halo de 3 px — l'indicateur perd en contraste ce
-qu'il regagne en **surface**, et le halo est la compensation, pas un ornement. Le même halo
-sert aux boutons, aux onglets et aux entrées de nav.
-
-**Le remède.** `--brand-to` (`#e84c3d`), qui tient **3,40** en restant un arrêt du dégradé.
-Si quelqu'un retire un jour le halo du champ, c'est ce basculement qu'il faut faire dans le
-même geste.
+**Ce qu'il faut garder quand même.** Le halo de 3 px du champ, des boutons, des onglets et
+des entrées de nav : il n'est plus une compensation, il reste ce qui rend le focus lisible
+d'un coup d'œil.
 
 ### 3.5 · La couleur d'actif en texte — `3,00` à `3,28` en clair
 

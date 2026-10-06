@@ -39,6 +39,22 @@ export function NavigationPage() {
           </div>
           <p className="caption">Le premier suit la surface ; le second force letters=&quot;dark&quot; sur fond sombre, pour montrer ce que fait la prop.</p>
         </Block>
+        <Block label="Lien actif — aria-current" hint="v0.23.0. Le lien active porte aria-current=&quot;page&quot; : la couleur --active et la graisse le disent aux yeux, l'attribut le dit au lecteur d'écran. Inspecte « Vidéos » dans la barre au repos ci-dessus.">
+          <p className="caption">Aucun changement visuel : c'est la même barre, avec l'attribut en plus.</p>
+        </Block>
+        <Block label="Menu replié — menu=&quot;always&quot;" hint="v0.23.0, opt-in. Avec menu (true), les liens et le CTA quittent la barre SOUS 64rem ; « always » le fait à toute largeur, c'est ce qu'on voit ici. Le panneau est un popover NATIF : clic sur le burger pour ouvrir, Échap ou clic extérieur pour fermer, le focus revient au burger — sans JavaScript. Le CTA passe en pleine largeur dans le pied du panneau.">
+          <div className="rounded-xl border border-border">
+            <Navbar homeLabel={`${IDENTITY.personne} — accueil`} brand={<Logo variant="wordmark" wordmark={IDENTITY.wordmark} height="1.375rem" />} scrolled={false} menu="always" links={LINKS} cta={<Button size="sm">La newsletter</Button>} />
+          </div>
+          <p className="caption">Au clavier : Tab jusqu'au burger, Entrée — Tab entre dans le panneau juste après le burger, Échap le referme et rend le focus. Là où l'ancrage CSS existe, le panneau s'ancre sous SA barre ; ailleurs il se pose sous le haut de la fenêtre, à --navbar-h — juste pour une barre collante.</p>
+        </Block>
+        <Block label="Bouton secondaire dans la barre" hint="v0.23.0. La barre est une PORTEUSE, comme la carte : un bouton ou un burger secondaire posé dedans prend --background au lieu de --secondary, sinon il s'y fondrait (écart 1,000). Le slot children se rend à droite, avant le CTA.">
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <Navbar homeLabel={`${IDENTITY.personne} — accueil`} brand={<Logo variant="wordmark" wordmark={IDENTITY.wordmark} height="1.375rem" />} scrolled={false} links={LINKS} cta={<Button size="sm">La newsletter</Button>}>
+              <Button variant="secondary" size="sm" icon={<Icon name="chevron-left" />}>Retour</Button>
+            </Navbar>
+          </div>
+        </Block>
       </Section>
 
       <Section title="Tabs" note="Groupe d'onglets segmenté sur le rail de contrôle. Rectangle (barre 0.875rem · onglet --radius-sm) — jamais un pill. L'onglet SÉLECTIONNÉ est une plaque --accent, libellé en --active — LA couleur de tout ce qui est actif (v0.21.0), sans contour. Le survol reste couleur seule, sans fond : c'est ce qui le distingue de la sélection, puisqu'en clair --accent et --surface-alt sont la même couleur.">
@@ -206,6 +222,25 @@ export function NavigationPage() {
                 <IconButton label="TikTok"><ContentIcon name="tiktok" /></IconButton>
                 <IconButton label="GitHub"><Icon name="github" /></IconButton>
               </>}
+            />
+          </div>
+        </Block>
+        <Block label="Les emplacements — v0.23.0" hint="Le pied est une STRUCTURE : marque, une ligne sous elle (note, un nœud — un lien y tient), N colonnes (links et/ou content libre), rangée sociale, ligne du bas (bottom). Le socle ne porte aucun contenu : tout ce qui se lit ici est fourni par l'appelant.">
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <Footer
+              brand={<Logo variant="wordmark" wordmark={IDENTITY.wordmark} height="1.25rem" />}
+              note={<a href="#">contact@exemple.fr</a>}
+              columns={[
+                { title: 'Ressources', links: [{ label: 'La newsletter' }] },
+                { title: 'Réseaux', content: (
+                  <span className="flex gap-space-2">
+                    <IconButton variant="secondary" label="YouTube" as="a" href="#"><ContentIcon name="youtube" /></IconButton>
+                    <IconButton variant="secondary" label="Instagram" as="a" href="#"><ContentIcon name="instagram" /></IconButton>
+                  </span>
+                ) },
+                { title: 'Infos', links: [{ label: 'Mentions légales' }, { label: 'Confidentialité' }] },
+              ]}
+              bottom={<span>© {IDENTITY.personne}</span>}
             />
           </div>
         </Block>

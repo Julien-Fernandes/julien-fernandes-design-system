@@ -74,6 +74,17 @@ img{max-width:100%;display:block}
 .mono{font-family:var(--font-mono);font-weight:var(--weight-regular)}
 .caption{font-size:var(--text-caption);font-weight:var(--weight-medium);line-height:var(--leading-normal);color:var(--text-muted)}
 .prose{line-height:var(--leading-prose)}
+/* LE SUR-TITRE NEUTRE — v0.23.0. Le gabarit exact de .eyebrow (taille, graisse, capitales,
+   interlettrage, interligne), SANS le pochoir dégradé : il rend en `currentColor`. C'est le
+   libellé de section posé à l'encre — « Stack », « En un coup d'œil », l'en-tête d'un
+   bloc de réglages — que les écrans recomposaient en cinq utilitaires, faute de classe.
+   PAS FRAGILE, et c'est la raison de son existence séparée : aucune des quatre
+   déclarations du pochoir (voir .accent ci-dessous), donc un utilitaire de couleur posé
+   sur le même nœud (`text-muted-foreground`) fait exactement ce qu'il dit.
+   UN NŒUD PAR RÔLE : .overline et .eyebrow ne se posent JAMAIS ensemble. Le mélange
+   produirait un dégradé ou un texte plein selon l'ordre de source — c'est soit l'un,
+   soit l'autre. */
+.overline{font-family:var(--font-body);font-size:var(--text-eyebrow);font-weight:var(--weight-semibold);text-transform:uppercase;letter-spacing:var(--tracking-eyebrow);line-height:var(--leading-snug)}
 
 /* The signature: ONE gradient word per title. Never two.
    QUATRE DÉCLARATIONS SOLIDAIRES — background, background-clip, color, width. Retirez-en
@@ -99,6 +110,33 @@ img{max-width:100%;display:block}
 .halo{position:absolute;inset:0;pointer-events:none;background:var(--gradient-halo)}
 .halo-top{background:var(--gradient-halo-top)}
 .halo-center{background:var(--gradient-halo-center)}
+/* L'ÉTENDUE DU HALO — v0.23.0. Les trois halos de la marque sont des ellipses en POUR-CENT
+   de la section : sur un écran large elles s'étalent, sur une section haute elles montent
+   trop. Deux étendues de plus, SANS AUCUNE COULEUR NI AUCUN JETON : c'est le même dégradé
+   de marque, peint dans une IMAGE de fond redimensionnée. L'ellipse garde ses proportions
+   dans l'image ; l'image change de taille et reste ancrée là où le halo l'est (bas, haut,
+   centre). Une image de fond ne déborde jamais de sa boîte : rien ne fuit hors de la
+   section, même sans `overflow:hidden`.
+     --wide       image 1,6 × la section : le halo couvre plus large et monte plus haut ;
+     --contained  image plafonnée à la colonne de page (--container-shell) : sur grand
+                  écran le halo reste sous le contenu au lieu de suivre la fenêtre.
+   Les deux déclarations de position valent 0,2,0 et arrivent après les placements : ce
+   sont elles qui gagnent, quel que soit l'ordre des classes sur le nœud. */
+.halo--wide,.halo--contained{background-repeat:no-repeat;background-position:50% 100%}
+.halo--wide{background-size:160% 155%}
+.halo--contained{background-size:min(100%,var(--container-shell)) 100%}
+.halo-top.halo--wide,.halo-top.halo--contained{background-position:50% 0%}
+.halo-center.halo--wide,.halo-center.halo--contained{background-position:50% 50%}
+
+/* LES ANCRES SOUS UNE BARRE COLLANTE — v0.23.0. `.ds-navbar` est `sticky` : un lien vers
+   `#section` amenait le titre de la section SOUS la barre, et une app le compensait
+   cible par cible (`scroll-margin-top`). La compensation se pose ici, une fois, sur le
+   conteneur de défilement : `scroll-padding-top` décale TOUTE cible — ancre, focus
+   clavier qui fait défiler (WCAG 2.4.11, focus non masqué), `scrollIntoView` — sans
+   toucher aucune d'elles. Conditionnée à la présence d'une barre : une app sans
+   `.ds-navbar` n'est pas concernée. Un cran d'air (--space-4) sous la barre, pour que le
+   titre ne la touche pas. */
+:root:has(.ds-navbar){scroll-padding-top:calc(var(--navbar-h) + var(--space-4))}
 
 /* .accent-hot n'est PAS ici : c'est un motif de MINIATURE et de MOTION, pas d'interface.
    Il est parti avec l'extension optionnelle `brand-content.css`. */

@@ -74,6 +74,30 @@ carrés identiques pour `sm`, `md` et `lg` pendant quatre versions.
 
 ---
 
+## Promouvoir depuis une app — la version de l'app sert de base
+
+Le cas d'école du test 2 : une app écrit chez elle ce dont elle a besoin, et le jour où un
+**deuxième produit** le demande, ça monte. La promotion ne réécrit pas de zéro : elle part
+de **la version de la première app**, celle qui a déjà payé ses défauts. Elle en retire ce
+qui connaît le métier de l'app (test 3 : la présentation monte, la connaissance reste) et
+n'y ajoute que ce que le deuxième demandeur exige et qui vaut pour tous. Les écarts sont
+écrits — ce qui est resté chez l'app, ce qui a été ajouté — dans le CHANGELOG et en tête
+de la règle.
+
+L'app d'origine n'est pas modifiée par le lot du socle : elle compose la version promue à
+son prochain lot, en gardant chez elle sa part métier.
+
+### Le registre
+
+| Version | Ce qui monte | 1ᵉʳ demandeur — sa version | 2ᵉ demandeur | Resté dans l'app |
+|---|---|---|---|---|
+| 0.23.0 | `.ds-prose`, la typographie de flux | Dashboard — `@utility document-riche` (le corps de son éditeur), qui l'annonçait lui-même candidat « si une deuxième app réclame une typographie de prose complète » | le site julienfernandes.com — pages légales, contenus Markdown | la liste de cases (`[data-type='taskList']`) et le `:focus` du champ éditable : ils connaissent TipTap |
+
+Les promotions antérieures (`Kbd`, `Rail`, `tiktok`…) sont racontées dans leur section du
+CHANGELOG ; le registre commence ici.
+
+---
+
 ## Les jetons — la même question, posée autrement
 
 > Ce jeton décrit-il une **mesure** ou une **identité** ?

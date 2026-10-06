@@ -86,8 +86,9 @@ sur son propre `src/`.
 
 ## 2 · Les utilitaires de marque perdent contre les composants
 
-**Ce qui casse.** Les huit utilitaires de `tokens/base.css` — `.display`, `.display-xl`,
-`.eyebrow`, `.chip`, `.accent`, `.mono`, `.caption`, `.prose` — vivent en `layer(base)`.
+**Ce qui casse.** Les neuf utilitaires de `tokens/base.css` — `.display`, `.display-xl`,
+`.eyebrow`, `.overline`, `.chip`, `.accent`, `.mono`, `.caption`, `.prose` — vivent en
+`layer(base)`.
 **Toutes** les règles de `patterns.css` vivent en `layer(components)`. Sur un même nœud, la
 couche des composants gagne **toujours**, quelle que soit la spécificité. (Pas de décompte
 ici volontairement : le fichier grossit, un nombre écrit une fois deviendrait faux sans que
@@ -136,6 +137,10 @@ ré-exporté qui l'a rattrapé, pas un contrôle.
 
 **Sans risque, en revanche** : la typographie pure — `font-*`, les paliers `text-heading`…,
 `leading-*`. Elle ne touche à aucune des quatre déclarations.
+
+**Le sur-titre neutre n'a pas ce piège** : `.overline` (v0.23.0) reprend le gabarit
+d'`.eyebrow` sans le pochoir, en `currentColor` — un utilitaire de couleur posé dessus
+fait ce qu'il dit. Mais un nœud par rôle : jamais `.overline` et `.eyebrow` ensemble.
 
 **La parade — structurelle, deux spans.** L'externe porte la mise en page et la typo, que
 l'enfant **hérite** ; l'interne ne porte que la classe et le texte.
@@ -311,6 +316,35 @@ contenu et ses contours qu'avec `var(--active)` ; il porte son jumeau de falsifi
 cas) et le rejoue à chaque appel. Pour le code d'une **app**, aucun garde : `text-primary`
 y est une classe valide. Le réflexe : *un état actif qui n'est pas en `text-active` est
 faux, quelle que soit la couleur qu'il a l'air d'avoir.*
+
+---
+
+## 9 · En rendu serveur, le calendrier grave « aujourd'hui » au moment du rendu
+
+**Ce qui casse.** `Calendar` calcule « aujourd'hui » par `new Date()` **au rendu**. Rendu
+côté serveur — une page statique Astro, un SSG, une requête SSR —, ce rendu a lieu sur le
+SERVEUR : le jour marqué `is-today`, le mois ouvert sans `value`, et tous les jours
+désactivés par un `min={new Date()}` sont ceux du **build** (ou de la requête), dans le
+**fuseau du serveur** — puis gravés dans le HTML. Mesuré sur une page Astro construite le
+6 : le 6 marqué, les jours 1 à 5 `disabled`, quel que soit le jour où le visiteur l'ouvre.
+
+**Pourquoi la panne est muette.** Le HTML est valide et plausible : un calendrier, un jour
+marqué. À l'hydratation, React recalcule chez le visiteur mais **ne corrige pas un
+attribut divergent** (`class`, `disabled`) — il le signale au mieux en console de
+développement. Le décalage ne se voit que chez quelqu'un qui ouvre la page un autre jour,
+ou d'un autre fuseau (serveur en UTC, visiteur à UTC+9) — jamais chez celui qui vient de
+construire.
+
+**La parade.** Monter le calendrier **côté client seulement** (`client:only="react"` en
+Astro — il n'y a rien à indexer dans une grille de jours), ou lui passer `today`
+(v0.23.0) calculé chez le visiteur. Même règle pour tout `min={new Date()}` : c'est une
+date de rendu, pas de visite.
+
+**Le garde.** Aucun : le défaut n'existe qu'au croisement du composant et d'un mode de
+rendu que le socle ne voit pas.
+
+> *Admission :* la cause est le `new Date()` de `Calendar.tsx`, **dans le paquet**. Sans
+> lui, aucune date de rendu ne serait gravée. Le critère passe.
 
 ---
 

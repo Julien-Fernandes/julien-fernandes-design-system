@@ -53,9 +53,9 @@ reprise en aveugle est une valeur recopiée.
   de `Dropdown` : une décision du socle qu'aucun sélecteur ne pouvait viser. Corrigés
   (`.ds-label__required`, `.ds-dropdown__hint`).
 
-**⚠️ Les utilitaires de marque perdent contre les composants.** Les huit de
-`tokens/base.css` — `.display`, `.display-xl`, `.eyebrow`, `.chip`, `.accent`, `.mono`,
-`.caption`, `.prose` — vivent en `layer(base)` ; toutes les règles de `patterns.css`
+**⚠️ Les utilitaires de marque perdent contre les composants.** Les neuf de
+`tokens/base.css` — `.display`, `.display-xl`, `.eyebrow`, `.overline`, `.chip`, `.accent`,
+`.mono`, `.caption`, `.prose` — vivent en `layer(base)` ; toutes les règles de `patterns.css`
 vivent en `layer(components)` et gagnent toujours sur le même nœud, quelle que soit la
 spécificité. `.mono` posé sur un nœud qu'une règle `.ds-*` typographie ne rend rien, en
 silence. **La parade** : l'utilitaire Tailwind équivalent sur le même jeton — `font-mono`
@@ -68,6 +68,28 @@ utilitaire posé sur le même nœud vit en `layer(utilities)` et gagne toujours,
 casser à l'écran. **Dangereux** : couleur, fond, `background-clip`, dimension (`text-*` de
 couleur, `bg-*`, `w-*`…) — le dégradé meurt en silence. **Sans risque** : la typographie
 (`font-*`, paliers `text-heading`…, `leading-*`). La mise en page va sur un span externe.
+
+**Le sur-titre NEUTRE est `.overline`** (v0.23.0) : le gabarit exact d'`.eyebrow` (taille,
+graisse, capitales, interlettrage), sans le pochoir — il rend en `currentColor`, donc un
+utilitaire de couleur posé dessus (`text-muted-foreground`) fait ce qu'il dit, et il n'est
+PAS fragile. Un nœud par rôle : `.overline` OU `.eyebrow`, jamais les deux. Dans une
+`Card` / un `CardHeader`, c'est `eyebrowTone="neutral"`.
+
+**La typographie de flux est `.ds-prose`** (v0.23.0, `layer(components)`) : une classe sur
+le CONTENEUR d'un texte suivi — rendu Markdown, page légale, document d'éditeur. Titres en
+display (`h1`/`h2` au palier `heading`, `h3` `subheading`, `h4` `heading-sm`), interligne
+de lecture, `--space-5` entre deux blocs et `--space-3` sous un titre, puces et numéros
+rétablis, liens SOULIGNÉS, `code`, `pre`, `blockquote`, `hr`, tableau aligné sur les
+paragraphes. Elle ne fixe aucune largeur : `max-w-read` à côté. `.prose` reste ce qu'il
+était — l'interligne seul.
+
+```tsx
+<article className="ds-prose max-w-read">
+  <h2>1. Éditeur du site</h2>
+  <p>Texte suivi, <a href="/contact">lien souligné</a>.</p>
+  <ul><li>Une puce</li></ul>
+</article>
+```
 
 ---
 
@@ -174,8 +196,15 @@ sur le sous-chemin optionnel `@julienfernandes/ds/brand-content`.
 </section>
 ```
 
-- Props : `placement` (`bottom·top·center`) · `intensity` (0–1, multiplicateur d'opacité).
+- Props : `placement` (`bottom·top·center`) · `intensity` (0–1, multiplicateur d'opacité) ·
+  `extent` (v0.23.0) : `section` (défaut, le halo de la marque en pour-cent de la section) ·
+  `wide` (1,6 × plus large et plus haut — une section courte) · `contained` (plafonné à
+  `--container-shell` : sur grand écran, il reste sous la colonne de page).
 - Les dégradés viennent des utilitaires `.halo*` de `tokens/base.css` — aucune valeur ici.
+  `extent` ne change AUCUNE couleur : c'est le même dégradé de marque, peint dans une image
+  de fond redimensionnée (`.halo--wide`, `.halo--contained`). Rien ne déborde de la
+  section. **Ne réécrivez jamais un `radial-gradient` à la main** pour agrandir un halo :
+  c'est exactement ce que `extent` remplace.
 
 ## Logo
 
@@ -247,6 +276,18 @@ sous 1.5rem.
 ```
 
 ```tsx
+// LA CARTE-LIEN (v0.23.0) : la carte ENTIÈRE est un seul <a>. variant="interactive" par
+// défaut, couleur de texte de la carte, anneau de focus visible quel que soit le variant.
+<Card href="/projets/kineflow" flush className="flex flex-col">
+  <img src="/kineflow.png" alt="" />
+  <div className="p-card-pad"><h3>KineFlow</h3><p>Planifier les soins…</p></div>
+</Card>
+// ⚠️ AUCUN lien ni bouton à l'intérieur — un <a> dans un <a> est invalide, et la seconde
+// cible est inatteignable au clavier. Le composant le signale en console en développement.
+// Une carte qui DOIT porter un bouton n'a pas de href : le lien va sur le bouton.
+```
+
+```tsx
 // L'en-tête à FILET (v0.21.0) : une Card flush qui porte un slot d'en-tête le rend à filet
 // toute seule — padding --space-4 --space-5, border-bottom, pas de gouttière ; le corps
 // porte son padding.
@@ -263,7 +304,9 @@ sous 1.5rem.
 - Props : `variant` (`default·interactive·feature`) · `size` (`md·lg`) · `flush` (sans
   padding, media plein bord — et l'en-tête à filet s'il y a un slot) · slots d'en-tête
   `eyebrow` / `icon` / `title` / `subtitle` / `action` · `titleSize` (`sm·lg`) ·
-  `headerGap` (`normal·airy`) · `as`.
+  `headerGap` (`normal·airy`) · `as` · `eyebrowTone` (`brand·neutral`, v0.23.0 — `neutral`
+  rend le sur-titre en `.overline`, à l'encre) · `href` / `target` / `rel` (v0.23.0, la
+  carte-lien — rend un `<a>`).
 - **`CardHeader` est exporté** (v0.21.0), du même fichier : c'est UN SEUL en-tête au socle
   — `Card` le compose par ses props, `Modal` le rend (pastille · titre + sous-titre ·
   croix), et une app le pose seule en tête d'une zone. Ses réglages : les cinq slots,
@@ -529,10 +572,20 @@ popover.
 ```tsx
 <Calendar value={date} onChange={setDate} min={new Date()} />
 <Calendar />
+<Calendar fluid value={date} onChange={setDate} />     {/* pleine largeur — v0.23.0 */}
+<Calendar today={aujourdhuiDuVisiteur} />               {/* « aujourd'hui » injecté — v0.23.0 */}
 ```
 
 - Props : `value` · `onChange(Date)` · `min` / `max` · `disabledDates` · `locale` · `bare`
-  (sans le cadre — l'usage interne du DatePicker).
+  (sans le cadre — l'usage interne du DatePicker) · `fluid` (v0.23.0 : la largeur du
+  conteneur, sept colonnes qui se la partagent, la hauteur des cases inchangée) · `today`
+  (v0.23.0 : le jour marqué `is-today` et le mois ouvert sans `value` ; défaut l'horloge
+  de la machine).
+- **⚠️ Rendu serveur (Astro, Next, SSG).** Sans `today`, « aujourd'hui » est calculé AU
+  RENDU : le jour du build, dans le fuseau du serveur, gravé dans le HTML — et
+  l'hydratation ne corrige pas un attribut divergent. Montez le calendrier côté client
+  seulement (`client:only` en Astro), ou passez `today` calculé chez le visiteur. Voir
+  PIEGES.md § 9.
 - États rendus : jour au repos, survolé, sélectionné (aplat `--primary`), aujourd'hui
   (`--primary-readable` gras), désactivé, focus-visible.
 - **Pas de plage.** En attendant un mode plage (périmètre envisagé : deux mois,
@@ -857,7 +910,9 @@ tiroir piloté par `open`/`onClose` de `Sidebar`.
 
 ## Footer
 
-Pied de site : marque, ligne de signature optionnelle, colonnes de liens, rangée sociale.
+Pied de site — une STRUCTURE à emplacements : la zone de marque (marque + une ligne sous
+elle), N colonnes, une rangée sociale, une ligne du bas. Le socle ne porte AUCUN contenu :
+ni adresse, ni réseau, ni mention légale, ni libellé — tout vient du projet.
 
 ```tsx
 <Footer
@@ -865,11 +920,24 @@ Pied de site : marque, ligne de signature optionnelle, colonnes de liens, rangé
   columns={[{ title: 'Séries', links: [{ label: 'Build' }, { label: 'Tuto' }] }]}
   social={<IconButton label="GitHub"><Icon name="github" /></IconButton>}
 />
+
+// Les emplacements de la v0.23.0 : une ligne qui porte un lien, une colonne de contenu
+// libre, la ligne du bas.
+<Footer
+  note={<a href="mailto:contact@exemple.fr">contact@exemple.fr</a>}
+  columns={[
+    { title: 'Ressources', links: [{ label: 'Newsletter', href: '/newsletter' }] },
+    { title: 'Réseaux', content: <span className="flex gap-space-2">{reseaux}</span> },
+  ]}
+  bottom={<span>© Nom du projet</span>}
+/>
 ```
 
-- Props : `columns` (`{title, links:[{label, href?}]}[]`) · `social` · `brand` (défaut :
-  le `Logo` du paquet) · `letters` · `note` (ligne de lieu/signature — AUCUN défaut :
-  omise, la ligne n'est pas rendue ; le point médian `·` sert de séparateur).
+- Props : `columns` (`{title, links?:[{label, href?}], content?}[]`) · `social` · `brand`
+  (défaut : le `Logo` du paquet) · `letters` · `note` (la ligne sous la marque — un nœud
+  depuis la v0.23.0, rendu dans un `<p>` : du contenu EN LIGNE, texte ou lien ; AUCUN
+  défaut, omise elle n'est pas rendue) · `bottom` (v0.23.0, la ligne du bas, sous les
+  colonnes et la rangée sociale ; omise, elle n'est pas rendue).
 
 ## Navbar
 
@@ -888,8 +956,32 @@ scroll : teinte + blur + ombre. C'est le SEUL endroit du système qui emploie
 - Props : `links` (`{label, href?, active?}[]`) · `cta` · `brand` (défaut : le `Logo`) ·
   `homeHref` / `homeLabel` · `letters` · `scrolled` (force l'état scrollé — spécimens) ·
   `children` (rendu dans l'emplacement de DROITE, juste **avant** `cta` : une action de plus
-  — bascule de thème, sélecteur de langue — sans remplacer le CTA).
-- États rendus : repos, scrollée, lien au repos / survolé / actif.
+  — bascule de thème, sélecteur de langue — sans remplacer le CTA) · `menu`
+  (`true·'always'`, v0.23.0) · `menuLabel` (défaut « Menu ») · `menuFooter` (défaut : le
+  `cta` ; `null` le retire).
+- **Le lien actif porte `aria-current="page"`** (v0.23.0) : `active` veut dire « la page
+  qu'on lit ».
+- **Le menu replié — `menu`, OPT-IN** (v0.23.0). Sous 64rem (ou à toute largeur avec
+  `menu="always"`), les liens et le `cta` quittent la barre ; un burger ouvre un panneau
+  qui les reprend en colonne, le `cta` en pleine largeur dans son pied. Le panneau est un
+  **`popover` natif** : ouverture, Échap, clic extérieur, focus rendu au burger, burger
+  annoncé « développé » — le navigateur fait tout, **sans JavaScript**. La barre marche
+  donc rendue côté serveur et jamais hydratée. Là où l'ancrage CSS existe, le panneau
+  s'ancre sous sa barre ; ailleurs il se pose à `--navbar-h` du haut de la fenêtre — juste
+  pour une barre collante.
+- **⚠️ Une ancre de la même page ne referme pas le panneau** — rien n'est « à
+  l'extérieur ». Hydratée, la barre le referme au clic d'un lien. Rendue sans JS (Astro
+  statique), le site ajoute une ligne :
+
+  ```tsx
+  document.addEventListener('click', e => (e.target as Element).closest('.ds-navbar__menu a')?.closest<HTMLElement>('[popover]')?.hidePopover());
+  ```
+- **Un bouton secondaire dans la barre** (un « Retour », le burger) prend `--background`
+  par déduction de surface (v0.23.0) : la barre est une porteuse, comme la carte.
+- **Les ancres ne passent plus sous la barre** (v0.23.0) : dès qu'une `.ds-navbar` est
+  dans la page, la racine reçoit `scroll-padding-top` = `--navbar-h` + `--space-4`.
+- États rendus : repos, scrollée, lien au repos / survolé / actif, menu replié fermé /
+  ouvert.
 
 ## Pagination
 

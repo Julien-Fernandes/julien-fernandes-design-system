@@ -36,17 +36,27 @@
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /* ---------- 1 · POLICES ----------
-   DM Sans (texte et UI) via Google Fonts. Anton (display) et JetBrains Mono (code) sont
-   auto-hébergées depuis src/styles/assets/fonts/. Anton ne livre QU'UNE graisse : 400.
-   Jamais de faux-gras. */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+   LES TROIS FAMILLES SONT AUTO-HÉBERGÉES, depuis src/styles/assets/fonts/ — v0.23.0.
+   DM Sans venait de Google Fonts par un `@import url(…)` : une requête tierce BLOQUANTE en
+   cascade (notre CSS → la feuille de Google → la police), l'adresse IP de chaque visiteur
+   envoyée à Google, et aucun `preload` possible. Elle est désormais servie avec le reste,
+   et une app peut la précharger par le sous-chemin `@julienfernandes/ds/fonts/*`.
+   DM Sans est une police VARIABLE (axe wght 100→1000) : DEUX fichiers au lieu des huit
+   instances statiques que servait Google, découpés par `unicode-range` — le navigateur ne
+   télécharge latin-ext que si la page en contient un glyphe. L'axe optique est figé à sa
+   valeur par défaut, comme dans les instances de Google : rendu identique.
+   Source : Fontsource (@fontsource-variable/dm-sans 5.3.0), licence SIL OFL 1.1 —
+   DMSans-OFL.txt à côté des fichiers.
+   Anton ne livre QU'UNE graisse : 400. Jamais de faux-gras. */
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:100 1000;font-display:swap;src:url('./assets/fonts/DMSans-Variable-latin.woff2') format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'DM Sans';font-style:normal;font-weight:100 1000;font-display:swap;src:url('./assets/fonts/DMSans-Variable-latin-ext.woff2') format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;src:url('./assets/fonts/Anton-400.woff2') format('woff2')}
 @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:400;font-display:swap;src:url('./assets/fonts/JetBrainsMono-400.woff2') format('woff2')}
 @font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500;font-display:swap;src:url('./assets/fonts/JetBrainsMono-500.woff2') format('woff2')}
 
 /* ---------- 2 · ÉCARTS D'ACCESSIBILITÉ ASSUMÉS ----------
-   Mesurés sur CETTE palette. Treize paires, quatre familles, et les quatre sont des
-   décisions de marque — aucune n'est un oubli.
+   Mesurés sur CETTE palette. Trois familles, et les trois sont des décisions de marque —
+   aucune n'est un oubli. (Le décompte des paires est celui de check-contrast.mjs.)
      · le CTA porte le DÉGRADÉ (ambre -> corail) : aucun arrêt chaud ne tient 4,5:1 sous un
        label blanc, c'est la définition même d'un dégradé chaud ;
      · l'orange en TEXTE (sur-titre, mot-clé clippé) est rationné à quelques mots en gros
@@ -54,8 +64,9 @@
        --primary-readable, qui tient partout (5,16 à 7,11) ;
      · les CONTOURS DOUX (crème sur crème) : le système sépare ses surfaces à l'ombre et à
        l'écart de luminance, pas au filet ;
-     · l'ANNEAU DE FOCUS, depuis la v0.8.0 : --ring vaut --brand-via, un arrêt du dégradé.
-       Il perd en contraste ce qu'il regagne en surface — voir son bloc ci-dessous.
+   L'ANNEAU DE FOCUS a figuré ici de la v0.8.0 à la v0.22.0 (--brand-via, 2,41:1). Depuis
+   la v0.23.0 il vaut --primary et tient le seuil des indicateurs non textuels : 3,12 sur la
+   page en clair, 4,79 en sombre. Ce n'est plus un écart — son bloc est parti.
    Les ICÔNES DÉCORATIVES DE MARQUE ont figuré ici un temps : passées sur --primary, la
    pastille (3,08 / 3,14) et l'icône de nav active (3,00 / 3,78) tiennent le seuil des
    graphiques non textuels. Elles ne sont plus des écarts — leur bloc est parti avec sa
@@ -116,7 +127,7 @@
 /* @a11y-assume: .ds-input — bordure --input vs page
    1,17:1. Contours doux : --input #e5e1da sur crème #f6f2ec. Le champ se lit à son
    REMPLISSAGE (--secondary #fbf8f3), pas à son filet. Atténué : au focus la bordure passe à
-   --ring #f08029 et un halo de 3px apparaît — voir le bloc --ring ci-dessous. */
+   --ring #e85d2f (3,12 sur la page) et un halo de 3px apparaît. */
 
 /* @a11y-assume: .ds-input — bordure --input vs remplissage
    1,23:1 en clair, 1,57 en sombre. Même filet, vu depuis l'intérieur du champ. Même raison.
@@ -175,18 +186,6 @@
    ci-dessus. Atténué : la graisse (les autres liens sont en 500), et le lien actif d'une
    navbar de site nomme la page qu'on lit — l'information est dans le titre de la page. */
 
-/* @a11y-assume: anneau de focus --ring sur --background
-   2,41 en clair — 2,41 sur la page, 2,51 sur la carte, 2,53 sur --secondary, 2,60 sur le
-   popover : sous le plancher de 3:1 des indicateurs non textuels, quelle que soit la
-   porteuse. --ring vaut --brand-via #f08029, l'arrêt MÉDIAN du dégradé : décision de
-   marque, prise en connaissance de la mesure — la marque est plus présente sur un arrêt du
-   dégradé que sur l'aplat. En sombre --ring reste --brand-from #f5a524 et tient 8,16.
-   CE QUI LE REND TENABLE, et il faut le garder : le focus du champ ne porte pas sur le seul
-   bord. Il porte un bord de 1,5px EN PLUS d'un halo de 3px — l'indicateur perd en contraste
-   ce qu'il regagne en SURFACE, et le halo est la compensation, pas un ornement.
-   Repli si l'écart déplaît : --brand-to #e84c3d, qui tient 3,40 en restant un arrêt du
-   dégradé. */
-
 /* @surface-assume: --secondary / --card — clair
    1,009. C'EST VOULU, pas une collision : une barre latérale et les cartes posées à sa
    droite sont toutes deux des surfaces de l'app, et ce qui les sépare est le filet et la
@@ -241,10 +240,15 @@
   /* Marque — remplissages. Orange rationné : accent seulement. */
   --primary:#e85d2f; --primary-foreground:#ffffff;
   --destructive:#e84c3d; --destructive-foreground:#ffffff;
-  /* L'ANNEAU DE FOCUS PORTE UN ARRÊT DU DÉGRADÉ, pas l'aplat — v0.8.0. La marque y est plus
-     présente, au prix de 2,41:1 sur la page : écart assumé par écrit ci-dessus, et compensé
-     par le halo de 3px du champ. Ne pas retirer le halo sans remonter --ring à --brand-to. */
-  --ring:#f08029;
+  /* L'ANNEAU DE FOCUS PORTE L'APLAT — v0.23.0 (M3), décision de Julien du 06/10/2026,
+     adoptée parce que check-contrast.mjs la valide. De la v0.8.0 à la v0.22.0 il portait
+     --brand-via #f08029, un arrêt du dégradé, au prix de 2,41:1 sur la page (écart assumé).
+     Sur l'aplat : 3,12 sur la page, 3,25 sur la carte, 3,28 sur --secondary, 3,37 sur le
+     popover — au-dessus du plancher de 3:1 des indicateurs non textuels. Seul --muted
+     reste juste dessous (2,96, contre ~2,3 avant) : le focus n'y porte jamais sur le seul
+     bord, le halo de 3px du champ l'accompagne. Écrit en clair, comme --active : un rôle,
+     pas un alias de --primary. */
+  --ring:#e85d2f;
   --brand-from:#f5a524; --brand-via:#f08029; --brand-to:#e84c3d;
   /* --brand-gradient et --brand-gradient-diagonal ne sont pas ici : le socle les calcule
      depuis les trois arrêts, et ses formules (90° et 135°) sont AU CARACTÈRE PRÈS celles du
@@ -340,15 +344,19 @@
   --secondary:#2b2a28; --secondary-foreground:#f2efea;
   --muted:#262523; --muted-foreground:#b0aea9;
   --accent:#3a2a20; --accent-foreground:#f2efea;
-  /* --ring NE BOUGE PAS en sombre : il n'y a jamais eu de blanc à retirer ici, et l'ambre
-     y tient 8,16 sur la page — largement au-dessus du seuil. */
-  --border:#3a3936; --input:#4a4843; --ring:#f5a524;
+  /* --ring = l'aplat en sombre aussi (v0.23.0, M3) : un seul anneau dans les deux thèmes.
+     4,79 sur la page, 3,78 sur --surface-alt, le plus bas — au-dessus du seuil partout.
+     (Il valait --brand-from #f5a524, 8,16.) */
+  --border:#3a3936; --input:#4a4843; --ring:#e85d2f;
   /* Un cran PLUS CLAIR que la carte en sombre — l'inverse du thème clair, même écart :
      1,090 contre 1,084. Le maître employait --accent (#2b2a28) pour ses survols, donc la
      même valeur que --card : sur fond sombre, survol invisible, rail de progression plat et
      shimmer immobile. Un seul jeton, trois défauts fermés. */
   --surface-alt:#32302d;
-  --text-secondary:#d2cfc9; --text-muted:#b0aea9; --text-inverted:#1f1e1c;
+  /* M2 — v0.23.0, décision de Julien (06/10/2026) : les deux gris de texte remontent d'un
+     cran en sombre. Sur une section d'encre, le texte secondaire se lisait comme
+     désactivé. Gain de contraste partout, aucune paire ne descend. */
+  --text-secondary:#ece9e3; --text-muted:#d2cfc9; --text-inverted:#1f1e1c;
   --primary:#e85d2f; --primary-foreground:#ffffff;
   --destructive:#e84c3d; --destructive-foreground:#ffffff;
   --primary-readable:#f0916b;

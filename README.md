@@ -58,7 +58,7 @@ gabarit, dont la marque d'exemple est froide et n'est celle de personne.)
 Pas de registry : chaque app épingle une version par un tag git.
 
 ```bash
-npm i github:Yamiro02/julien-fernandes-design-system#v0.22.0
+npm i github:Yamiro02/julien-fernandes-design-system#v0.23.0
 ```
 
 Cinq **peer dependencies**, à la charge de l'app :
@@ -262,7 +262,11 @@ de Tailwind, sur laquelle reposent les composants shadcn de ton app.
 > ```
 
 `tokens/base.css` fournit aussi des classes prêtes à l'emploi : `.display` `.display-xl` `.eyebrow`
-`.chip` `.accent` `.mono` `.caption` `.prose` `.halo` `.page` `.ds-logo`.
+`.overline` (le sur-titre neutre, v0.23.0) `.chip` `.accent` `.mono` `.caption` `.prose` `.halo`
+(+ `.halo--wide` / `.halo--contained`, v0.23.0) `.page` `.ds-logo`. Et `patterns.css` la
+typographie de flux **`.ds-prose`** (v0.23.0) : posée sur le conteneur d'un texte suivi —
+rendu Markdown, page légale —, elle en règle titres, paragraphes, listes, liens, code et
+tableau.
 
 ---
 
@@ -303,10 +307,30 @@ Les règles d'usage composant par composant sont dans [`docs/PROMPTS.md`](docs/P
 
 ## Polices
 
-`src/styles/assets/fonts/` existe et est **vide** : c'est là qu'un projet dépose ses `.woff2`
-auto-hébergés, chargés par les `@font-face` en tête de son fichier de marque. Le socle ne
-connaît que les trois NOMS `--font-display` / `--font-body` / `--font-mono`. (La marque
-d'exemple charge les siennes depuis Google Fonts, le dossier reste donc vide dans le dépôt.)
+`src/styles/assets/fonts/` porte les `.woff2` **auto-hébergés** de la marque, chargés par les
+`@font-face` en tête de son fichier de marque. Le socle ne connaît que les trois NOMS
+`--font-display` / `--font-body` / `--font-mono`. La marque de ce dépôt y dépose les trois
+familles — Anton, DM Sans (variable, latin + latin-ext), JetBrains Mono — et **ne fait plus
+aucune requête vers Google Fonts** depuis la v0.23.0.
+
+**Précharger une police** (v0.23.0) — le sous-chemin `@julienfernandes/ds/fonts/*` expose les
+fichiers. Importés par le bundler, ils sortent à **la même URL hachée** que celle de la feuille
+de style : le `preload` et le `@font-face` désignent le même fichier, il n'est téléchargé
+qu'une fois. (Copier le fichier dans `public/` le ferait télécharger deux fois, sous deux URL.)
+
+```astro
+---
+// Astro — dans le <head> du layout
+import dmSans from '@julienfernandes/ds/fonts/DMSans-Variable-latin.woff2?url';
+import anton from '@julienfernandes/ds/fonts/Anton-400.woff2?url';
+---
+<link rel="preload" href={dmSans} as="font" type="font/woff2" crossorigin />
+<link rel="preload" href={anton} as="font" type="font/woff2" crossorigin />
+```
+
+Ne préchargez que ce qui est visible au premier écran : une police préchargée et non
+employée coûte une requête pour rien.
+
 Pour le logo, préfère le composant `Logo` : il rend le mark en CSS, avec le point en dégradé.
 
 ---

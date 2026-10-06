@@ -54,7 +54,7 @@ export function Foundations() {
       </Section>
 
       <Section title="Typographie" note="--font-display sur tous les titres, avec la casse et la graisse de --heading-transform / --heading-weight. --font-body pour le corps et l'UI. --font-mono pour le code et les métadonnées techniques.">
-        <Block label="Affiche et titres">
+        <Block label="Affiche et titres" hint="Sous 64rem (v0.23.0), les deux displays descendent d'un cran SUR L'ÉCHELLE : display-xl prend 3.25rem (la valeur desktop de display), display prend 2.5rem (celle de heading-xl) — comme heading-xl et heading le faisaient déjà. Rétrécis la fenêtre pour le voir.">
           <Spec token="--text-display-xl · miniature et motion"><span className="display-xl">On build une app</span></Spec>
           <Spec token="--text-display · hero du site"><span className="display">On build une app</span></Spec>
           <Spec token="--text-heading-xl · h1"><h1>Le résultat, pas l'outil</h1></Spec>
@@ -71,12 +71,31 @@ export function Foundations() {
           <Spec token="--text-control · boutons, champs, chips, onglets"><span className="text-control font-semibold">Voir la chaîne</span></Spec>
           <Spec token="--text-caption"><span className="caption">il y a 3 j · 18,2 k vues</span></Spec>
           <Spec token="--text-eyebrow"><span className="eyebrow">Méthode · 03</span></Spec>
+          <Spec token=".overline · le sur-titre neutre (v0.23.0)"><span className="overline">En un coup d'œil</span><span className="overline text-text-muted">En sourdine</span></Spec>
           <Spec token="--text-chip"><span className="chip text-text-muted">Build</span></Spec>
           <Spec token="--font-mono"><span className="mono text-caption">npm create vite@latest app</span></Spec>
         </Block>
         <Block label="Interlignes" hint="Interface 1.5 · lecture suivie 1.7 (classe .prose).">
           <p className="max-w-read">Interface — 1.5. Le ton d'écriture appartient au projet ; ce qui appartient au système, c'est l'interligne : 1.5 en interface, 1.7 en colonne de lecture suivie.</p>
           <p className="prose max-w-read">Lecture suivie — 1.7. Une colonne de lecture continue respire davantage : mentions légales, article de fond, page à lire de bout en bout.</p>
+        </Block>
+        <Block label="Typographie de flux — .ds-prose" hint="v0.23.0, promue depuis Dashboard (son document riche) au deuxième demandeur, un site. Une classe sur le conteneur : titres de la display, paragraphes à 1.7, puces rétablies, liens soulignés, code, citation, filet, tableau. Le contenu d'un rendu Markdown ou d'un éditeur s'y pose tel quel.">
+          <article className="ds-prose max-w-read">
+            <h2>1. Ce que je collecte</h2>
+            <p>Un texte suivi, posé tel qu'un rendu <strong>Markdown</strong> le produit. Les liens <a href="#">sont soulignés</a> : dans un flux, la couleur seule ne suffit pas à les distinguer.</p>
+            <ul>
+              <li>Une puce, rétablie — le preflight les retire partout ailleurs.</li>
+              <li>Une seconde puce, à --space-2 de la première.</li>
+            </ul>
+            <h3>Un intertitre</h3>
+            <p>Le titre colle à ce qu'il annonce : --space-3 dessous, --space-5 entre deux blocs. Du <code>code en ligne</code> au fil du texte.</p>
+            <blockquote>Une citation, en retrait, sur son filet.</blockquote>
+            <hr />
+            <ol>
+              <li>Une liste numérotée.</li>
+              <li>Et sa suite.</li>
+            </ol>
+          </article>
         </Block>
       </Section>
 

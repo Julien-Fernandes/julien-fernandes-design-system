@@ -2,8 +2,23 @@ import type { JSX, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { Logo } from '../brand/Logo';
 
-/** Site footer: mark, location line, link columns, social row. */
-export interface FooterColumn { title: string; links: { label: string; href?: string }[] }
+/**
+ * Site footer — une STRUCTURE à emplacements, rien d'autre : la zone de marque (la
+ * marque, une ligne sous elle), N colonnes, une rangée sociale, une ligne du bas.
+ * Le socle ne porte AUCUN contenu : ni adresse, ni réseau, ni mention légale, ni libellé.
+ * Tout ce qui s'y lit vient du projet.
+ */
+export interface FooterColumn {
+  title: string;
+  /** Les liens de la colonne, en `.ds-footer__link`. Optionnels depuis la v0.23.0 : une
+   *  colonne peut ne porter que du `content`. */
+  links?: { label: string; href?: string }[];
+  /**
+   * Contenu LIBRE, rendu après les liens (v0.23.0) — une rangée d'icônes sociales, un
+   * bouton, une ligne de texte. La colonne l'empile avec le même écart que ses liens.
+   */
+  content?: ReactNode;
+}
 
 export interface FooterProps {
   columns?: FooterColumn[];
@@ -14,17 +29,24 @@ export interface FooterProps {
    *  Sans effet si vous passez votre propre `brand`. */
   letters?: 'dark' | 'light';
   /**
-   * Ligne de lieu / signature, sous la marque. Le point médian sert de séparateur.
-   * AUCUNE valeur par défaut : elle portait une ville en dur, dans un composant du SOCLE —
-   * un projet ne pouvait pas la retirer sans passer une chaîne vide. Omise, la ligne n'est
-   * pas rendue du tout.
+   * Ligne sous la marque — lieu, signature, adresse de contact. Le point médian sert de
+   * séparateur. AUCUNE valeur par défaut : elle portait une ville en dur, dans un composant
+   * du SOCLE — un projet ne pouvait pas la retirer sans passer une chaîne vide. Omise, la
+   * ligne n'est pas rendue du tout.
+   * Un nœud depuis la v0.23.0 (une chaîne reste valable) : un lien `mailto:` y tient. Elle
+   * est rendue dans un <p> — du contenu EN LIGNE (texte, lien), pas des blocs.
    */
-  note?: string;
+  note?: ReactNode;
+  /**
+   * La ligne du BAS (v0.23.0), sous les colonnes et la rangée sociale : ©, mention
+   * légale, liens de pied de page. Omise, la ligne n'est pas rendue.
+   */
+  bottom?: ReactNode;
   className?: string;
 }
 
 export function Footer({
-  columns = [], social, brand, letters, note, className = '',
+  columns = [], social, brand, letters, note, bottom, className = '',
 }: FooterProps): JSX.Element {
   return (
     <footer className={cn('ds-footer', className)}>
@@ -37,11 +59,12 @@ export function Footer({
           {columns.map(col => (
             <div key={col.title} className="ds-footer__col">
               <span className="eyebrow">{col.title}</span>
-              {col.links.map(l => (
+              {(col.links ?? []).map(l => (
                 <a key={l.label} href={l.href || '#'} className="ds-footer__link">
                   {l.label}
                 </a>
               ))}
+              {col.content}
             </div>
           ))}
         </div>
@@ -49,6 +72,11 @@ export function Footer({
       {social ? (
         <div className="page ds-footer__social">
           {social}
+        </div>
+      ) : null}
+      {bottom ? (
+        <div className="page ds-footer__bottom">
+          {bottom}
         </div>
       ) : null}
     </footer>

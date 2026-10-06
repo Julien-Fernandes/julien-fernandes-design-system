@@ -23,6 +23,140 @@ concordent.
 
 ---
 
+## 0.23.0 — le site public : menu sans JS, polices locales, et la prose promue
+
+Le lot que décrit `docs/AUDIT-SITE.md` : ce qu'un site public (Astro, rendu statique,
+îlots React) demandait au socle et qui vaut pour n'importe quel projet. **Rien de propre à
+ce site n'entre dans le paquet** — ni libellé, ni contenu, ni mise en page : chaque ajout
+est une prop, une classe ou un emplacement que le projet remplit. L'audit lui-même reste
+dans le dépôt mais sort du paquet (`"!docs/AUDIT-SITE.md"` dans `files`).
+
+### ⚠ Ce qui change à l'écran chez QUI monte de version — sans toucher à son code
+
+Tout le reste est opt-in. Ces quatre lignes-là sont voulues.
+
+| Ce qui bouge | Avant (0.22.0) | Après | Sites concernés |
+|---|---|---|---|
+| **L'anneau de focus** (`--ring`, M3) | `--brand-via` `#f08029` en clair (2,41:1, écart assumé), `--brand-from` `#f5a524` en sombre | l'aplat **`#e85d2f`** dans les deux thèmes : 3,12 sur la page en clair, 4,79 en sombre — **le seuil de 3:1 tient**, l'écart assumé disparaît | tout focus clavier de Creator et Dashboard : champs, boutons, onglets, cases, jours de calendrier |
+| **Les gris de texte en sombre** (M2) | `--text-secondary` `#d2cfc9`, `--text-muted` `#b0aea9` | **`#ece9e3`** et **`#d2cfc9`** — un cran plus clairs | tout texte secondaire et toute légende en thème sombre |
+| **Les deux displays sous 64rem** (B10) | 3,25 / 4,5rem à toutes les largeurs | `--text-display` **2,5rem**, `--text-display-xl` **3,25rem** — un cran plus bas SUR L'ÉCHELLE existante (les valeurs desktop de `heading-xl` et de `display`), comme `heading-xl` et `heading` le faisaient déjà | relevé : ni Creator ni Dashboard ne lisent ces deux paliers en taille (Dashboard pose `.display` mais écrase la taille par un utilitaire) — leurs pages vitrine internes seulement |
+| **DM Sans** (B15) | chargée depuis Google Fonts | servie par le paquet — **même dessin**, aucune requête tierce | toutes les apps : une requête bloquante en moins, plus d'adresse IP envoyée à Google |
+
+Rien ne descend tout seul : Creator est épinglé à v0.22.0, Dashboard et Editing à v0.21.0. Monter =
+réinstaller par la spec explicite, puis vérifier le SHA du lock (GOVERNANCE, « côté app »).
+
+### Ce qui entre
+
+- **B1 · `Navbar menu`** — le menu replié, **opt-in** (`menu` absent = DOM d'hier). Sous
+  64rem (ou partout avec `menu="always"`), les liens et le `cta` quittent la barre ; un
+  burger ouvre un panneau qui les reprend, le `cta` en pleine largeur dans son pied
+  (`menuFooter`, `menuLabel`). Le panneau est un **`popover` natif** : ouverture, Échap,
+  clic extérieur, focus rendu au burger, burger annoncé « développé » — tenus par le
+  navigateur, **sans JavaScript**. Vérifié sur une page Astro statique à zéro script :
+  ouvert au clic, fermé par Échap, focus rendu. Hydratée, la barre referme aussi le
+  panneau quand on suit un de ses liens ; non hydratée, une ancre de la même page ne le
+  referme pas (la ligne à ajouter est dans `docs/PROMPTS.md`). Là où l'ancrage CSS
+  existe, le panneau s'ancre sous SA barre (`anchor-name` posé en ligne, nom dérivé de
+  `useId`) ; ailleurs il se pose à `--navbar-h`. `popoverTarget` (React 19) ou
+  `popovertarget` (React 18) selon la version présente : aucun avertissement dans l'une
+  ni dans l'autre.
+- **B2 · `aria-current="page"`** sur le lien `active` de la barre (et de son panneau).
+- **B4 · `Footer` à emplacements** — `note` devient un nœud (une chaîne reste valable ; un
+  `mailto:` y tient), `FooterColumn.content` (contenu libre après les liens, `links`
+  devient optionnel), `bottom` (la ligne du bas, `.ds-footer__bottom`). Le pied ne porte
+  toujours aucun contenu.
+- **B5 · `Card href`** (+ `target`, `rel`) — la carte ENTIÈRE est un seul `<a>`,
+  `variant="interactive"` par défaut, couleur de texte de la carte (`.ds-card--link`
+  neutralise la couleur et la dérive de la règle `a`), anneau de focus visible quel que
+  soit le variant, avec un **contour transparent** qui reste visible en contrastes forcés.
+  Un lien ou un bouton imbriqué est signalé en console en développement.
+- **B6 · `Calendar fluid`** — pleine largeur, `repeat(7, minmax(0,1fr))`. La hauteur des
+  cases ne change pas : l'audit proposait 2,5rem, c'eût été une mesure nouvelle — refusée.
+- **B7 · `Calendar today`** — « aujourd'hui » injectable (défaut inchangé : l'horloge au
+  rendu). Le piège qu'il ferme est écrit : **PIEGES § 9**, le calendrier rendu côté
+  serveur grave la date du build.
+- **B8 · `Halo extent`** (`section·wide·contained`) — **aucune couleur, aucun jeton** :
+  c'est le dégradé de la marque, peint dans une image de fond redimensionnée
+  (`.halo--wide` 160 % × 155 %, `.halo--contained` plafonnée à `--container-shell`),
+  ancrée là où le halo l'est. Une image de fond ne déborde jamais : rien ne fuit hors de
+  la section. (L'audit proposait de dériver les arrêts par `color-mix` ; inutile — et ça
+  aurait figé la forme du halo de cette marque dans le socle.)
+- **B9 · `.overline`** — le sur-titre neutre : le gabarit d'`.eyebrow` sans le pochoir, en
+  `currentColor`. **Pas fragile** (`check-fragile-classes` ne le dérive pas, à raison). Un
+  nœud par rôle. Dans `Card` / `CardHeader` : `eyebrowTone="neutral"`.
+- **B12 · la barre est une porteuse** — un bouton ou un bouton-icône secondaire posé dans
+  `.ds-navbar` prend `--background` (même déduction que dans une carte) ; couvre le
+  burger et le panneau.
+- **B13 · les ancres sous la barre collante** — `:root:has(.ds-navbar){scroll-padding-top:
+  calc(var(--navbar-h) + var(--space-4))}`. Le brief disait `scroll-margin-top` : posé sur
+  le conteneur de défilement plutôt que sur chaque cible, il fait le même travail pour
+  TOUTES les ancres, et couvre aussi le focus clavier qui fait défiler (WCAG 2.4.11, focus
+  non masqué). Sans barre dans la page, rien ne s'applique.
+- **B14 · `@julienfernandes/ds/fonts/*`** — les polices sont importables par l'app, donc
+  préchargeables. Vérifié sur Astro : l'URL du `preload` et celle du `@font-face` sont la
+  MÊME URL hachée — un seul téléchargement.
+- **B15 · DM Sans auto-hébergée** — variable (axe wght), deux fichiers par
+  `unicode-range` (latin 36,9 Ko, latin-ext 18,2 Ko) au lieu des huit instances statiques
+  de Google, source Fontsource 5.3.0, licence OFL jointe (`DMSans-OFL.txt`). Plus aucune
+  requête vers Google Fonts : vérifié dans la feuille émise par Astro.
+- **C1 · `.ds-prose`** — la typographie de flux, **promue depuis Dashboard**
+  (`@utility document-riche`), deuxième demandeur : le site. Sa version sert de base ; ce
+  qui connaît son éditeur reste chez lui (`[data-type='taskList']`, `:focus`) ; ajouts :
+  proximité titre → texte (`--space-3`), écart entre puces (`--space-2`), `h4`, lien
+  souligné (WCAG 1.4.1). Classe en `layer(components)`, sélecteurs descendants seulement.
+  `.prose` ne change pas. La promotion est consignée dans GOVERNANCE (nouvelle section,
+  « Promouvoir depuis une app », et son registre). Dashboard n'est pas modifié par ce
+  lot : il composera `.ds-prose` à son prochain lot, en gardant sa part TipTap.
+
+### Les décisions de marque
+
+- **M2 adopté** (voir le tableau).
+- **M3 adopté, parce que `check-contrast.mjs` le valide** — sans cette condition, rien
+  n'aurait bougé. Mesuré avant d'écrire : 3,12 / 4,79 sur la page ; 3,25 à 3,37 sur
+  carte, `--secondary` et popover en clair ; 3,78 au plus bas en sombre. Seul `--muted` en
+  clair reste à 2,96 (contre ~2,3 avant). Le bloc `@a11y-assume` de l'anneau est retiré —
+  le garde l'exigeait — et `docs/accessibilite.md` est régénéré (`--table`) : **18 écarts
+  assumés au lieu de 19**, § 3.4 réécrit en « sorti des écarts ».
+- **M4 non confirmé, donc rien n'est corrigé.** Vérifié dans la vitrine, au clic réel
+  (Chromium) : clic sur le libellé ou sur la case → la case prend le focus mais
+  `:focus-visible` reste faux, aucun halo ; au clavier, le halo apparaît comme prévu. La
+  règle est `:focus-visible` dans le paquet comme dans le bundle des maquettes : le halo
+  vu dans Claude Design venait de l'outil, pas du socle.
+- **M1 refusé** (liens en `--primary`, 3,12:1 sous le 4,5 du texte). Non fait.
+
+### Non fait, volontairement
+
+B3 (teinte CSS de la barre), B11 (Pastille « puce »), B16 (frontière 1 024 px) : reportés.
+Aucune pastille « en direct », aucun carrousel, aucun compte à rebours, aucun composant
+métier : ils restent dans le site (`docs/AUDIT-SITE.md` § 9).
+
+### Le reste
+
+- Vitrine : chaque ajout y est — Navigation (lien actif, menu replié ouvrable, bouton dans
+  la barre, pied à emplacements), Data display (cartes-liens, sur-titre neutre),
+  Formulaires (calendrier fluide, `today` injecté), Marque (les trois étendues de halo),
+  Fondations (`.overline`, la note des displays mobiles, un spécimen `.ds-prose`). La note
+  de l'Input qui parlait de `--brand-via` est corrigée.
+- Docs : PROMPTS (Navbar, Footer, Card, Calendar, Halo, et les classes `.overline` /
+  `.ds-prose`), PIEGES (§ 2 compte neuf utilitaires, § 9 nouveau), README (polices et
+  préchargement, classes), DESIGN.md (la ligne `--ring` remplace celle de `--brand-via`),
+  GOVERNANCE (promotions). Deux commentaires du socle (`core.css`, `preflight.css`) qui
+  citaient l'import Google de cette marque au présent sont remis au passé.
+- `check-portage.sh` : **32 correctifs** (sept entrent, recomptés).
+- Gabarit : porté en **0.9.0** — API, comportement, accessibilité ; ni M2, ni M3, ni B15,
+  ni B12 (le gabarit n'a pas la déduction de surface du bouton secondaire, divergence
+  assumée de son inventaire).
+
+**Aucune rupture d'API.** 39 composants, 48 glyphes, 3 icônes de plateforme, quatorze
+gardes. Toutes les props sont additives ; `note: string` → `ReactNode` est un
+élargissement ; `FooterColumn.links` devient optionnel.
+
+**Vérifié avant tag :** typecheck, les treize gardes hors version, `check-portage.sh`,
+`npm run demo:build`, `npm run build`, et le paquet monté dans un projet Astro 7 /
+React 19 (build statique, rendu inspecté). **Après tag :** `npm run lint` en entier.
+
+---
+
 ## 0.22.0 — `ContentIcon` gagne `tiktok`
 
 Un lot d'une seule pièce, entré par la règle du deuxième demandeur (GOVERNANCE, test 2) :

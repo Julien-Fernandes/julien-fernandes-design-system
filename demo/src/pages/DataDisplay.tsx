@@ -38,6 +38,25 @@ export function DataDisplayPage() {
           </Grid>
         </Block>
 
+        <Block label="Carte-lien — href" hint="v0.23.0. La carte ENTIÈRE est un seul <a> : une cible au clavier, au pointeur et au lecteur d'écran. Elle prend variant=&quot;interactive&quot; par défaut, garde la couleur de texte de la carte (pas celle des liens), et son anneau de focus est visible quel que soit le variant — fais Tab jusqu'à elle. Aucun lien ni bouton à l'intérieur : le composant le signale en console en développement.">
+          <Grid cols={3}>
+            <Card href="#" flush className="flex flex-col">
+              <span className="block h-space-8 bg-grad-soft" />
+              <div className="flex flex-col gap-space-2 p-card-pad">
+                <h4>Carte-lien flush</h4>
+                <p className="caption">Média pleine largeur, puis le texte du lien.</p>
+              </div>
+            </Card>
+            <Card href="#" eyebrow="Série" title="Avec en-tête">
+              <p className="caption">Les slots d'en-tête marchent comme sur toute carte.</p>
+            </Card>
+            <Card href="#" className="is-focus">
+              <h4>Focus forcé</h4>
+              <p className="caption">Anneau 3px --ring, contour transparent pour les contrastes forcés.</p>
+            </Card>
+          </Grid>
+        </Block>
+
         <Block label="Tailles et flush" hint="md = rayon lg / padding 1.75rem · lg = rayon xl / padding 2rem.">
           <Grid cols={3}>
             <Card size="md"><h4>Taille md</h4><p className="caption">--card-pad</p></Card>
@@ -82,6 +101,14 @@ export function DataDisplayPage() {
                 <p className="caption">titleSize=&quot;lg&quot; passe le titre en --text-subheading.</p>
                 <p className="caption">headerGap=&quot;airy&quot; ouvre la gouttière à --space-6, pour une carte à blocs.</p>
               </Stack>
+            </Card>
+            <Card
+              eyebrow="Réglages du compte"
+              eyebrowTone="neutral"
+              title="Sur-titre neutre"
+              action={<Badge tone="success" pad="dense" icon={<Icon name="circle-check" strokeWidth={2.5} />}>Actif</Badge>}
+            >
+              <p className="caption">eyebrowTone=&quot;neutral&quot; (v0.23.0) rend le sur-titre en .overline — le gabarit d'.eyebrow à l'encre, sans dégradé. Un seul des deux par nœud.</p>
             </Card>
           </Grid>
         </Block>

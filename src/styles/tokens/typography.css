@@ -64,7 +64,17 @@
   --weight-regular:400; --weight-medium:500; --weight-semibold:600; --weight-bold:700;
 }
 /* Responsive heading drop — FROM APP CODE: below Tailwind's lg (64rem) the two
-   title tiers step down one notch. Tokens only; desktop is untouched. */
+   title tiers step down one notch. Tokens only; desktop is untouched.
+   LES DEUX DISPLAYS DESCENDENT AUSSI — v0.23.0. Un héros à 52 px et un display-xl à 72 px
+   ne tiennent pas sur 390 px de large : chaque site recopiait sa propre taille mobile en
+   `!important`. Chacune descend d'UN cran SUR L'ÉCHELLE EXISTANTE, aucune valeur nouvelle :
+   --text-display prend la valeur desktop de --text-heading-xl (2.5rem), --text-display-xl
+   celle de --text-display (3.25rem). Les canevas à dimensions fixes (miniatures, slides)
+   fixent leur propre largeur : ils ne passent jamais sous 64rem et ne bougent pas. */
 @media (width < 64rem){
-  :root{ --text-heading-xl:1.75rem; /* 28 */ --text-heading:1.625rem; /* 26 */ }
+  :root{
+    --text-heading-xl:1.75rem; /* 28 */ --text-heading:1.625rem; /* 26 */
+    --text-display:2.5rem;     /* 40 — = --text-heading-xl desktop */
+    --text-display-xl:3.25rem; /* 52 — = --text-display desktop */
+  }
 }
