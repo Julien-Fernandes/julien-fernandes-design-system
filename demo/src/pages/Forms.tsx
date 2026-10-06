@@ -138,7 +138,7 @@ export function FormsPage() {
         </Block>
       </Section>
 
-      <Section title="Calendar" note="Vue mois, lundi d'abord, locale fr-FR. Date natif et Intl uniquement — aucune dépendance.">
+      <Section title="Calendar" note="Vue mois, lundi d'abord, locale fr-FR. Date natif et Intl uniquement — aucune dépendance. ACCESSIBILITÉ (v0.24.0) : les jours forment un groupe nommé par le mois ; chacun annonce sa date complète (« lundi 13 octobre 2026 »), sélectionné (aria-pressed), aujourd'hui (aria-current) ou indisponible (disabled). UN arrêt de tabulation dans les jours : flèches ± 1 jour / ± 1 semaine, Début/Fin = lundi/dimanche, PageHaut/PageBas = mois (+ Maj : année), en sautant les jours indisponibles. Essaie au clavier sur le calendrier « Bornes et dates désactivées ».">
         <Grid cols={3}>
           <Block label="Par défaut">
             <Calendar value={date} onChange={setDate} />
@@ -189,6 +189,16 @@ export function FormsPage() {
             </FormField>
           </Block>
         </Grid>
+        <Block label="Câblage automatique — v0.24.0" hint="Quand l'enfant est UN contrôle (Input, Textarea, Select, Checkbox, Radio, Switch, ou un input/select/textarea natif), FormField pose lui-même son id (s'il manque) — le libellé le vise —, aria-describedby vers l'erreur ou l'aide, et aria-invalid quand il y a une erreur. Ici, AUCUN id ni aria-* n'est écrit à la main : inspecte le champ. Un enfant composite est laissé tel quel ; l'aide et l'erreur portent un id stable (<id>-aide, <id>-erreur) pour un câblage manuel.">
+          <Grid cols={2}>
+            <FormField label="Sans rien câbler — aide" help="Le lecteur d'écran lit cette aide avec le champ.">
+              <Input placeholder="ton@email.com" />
+            </FormField>
+            <FormField label="Sans rien câbler — erreur" error="Cet e-mail a l'air bancal.">
+              <Input defaultValue="pas-un-email" />
+            </FormField>
+          </Grid>
+        </Block>
         <Row label="rail partagé — bouton md, input et select s'alignent à 3rem">
           <Input placeholder="ton@email.com" />
           <Select options={SERIES} defaultValue="build" />

@@ -49,6 +49,18 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* L'ALIAS DÉPRÉCIÉ `.overline` — v0.24.0, À RETIRER EN v0.25.0.
+   Le sur-titre neutre s'appelle `.ds-overline`. Son ancien nom, `.overline`, est celui
+   d'un utilitaire statique de Tailwind (`text-decoration-line: overline`) : tant que
+   l'alias vit, on interdit au scanner de générer ce candidat, sinon l'utilitaire —
+   en `layer(utilities)`, donc gagnant — tracerait un trait au-dessus de chaque sur-titre
+   écrit avec l'ancien nom. Mesuré sur la vitrine : sans cette ligne, la feuille émise
+   porte DEUX règles `.overline`, dont `text-decoration-line: overline`.
+   CE QUE ÇA COÛTE, et c'est borné à une version : l'utilitaire natif `overline` n'est pas
+   générable chez une app qui monte ce fichier. Aucune app du projet ne s'en sert
+   (vérifié) ; `[text-decoration-line:overline]` reste disponible en valeur arbitraire. */
+@source not inline("overline");
+
 /* Le `darkMode` en mode classe du preset v3. */
 @custom-variant dark (&:is(.dark *));
 

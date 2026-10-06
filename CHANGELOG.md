@@ -23,6 +23,129 @@ concordent.
 
 ---
 
+## 0.24.0 — quatre manques remontés par le site : un nom, une grille, un câblage, des glyphes
+
+Quatre manques génériques, remontés par le site public après sa montée en v0.23.0, chacun
+contourné chez lui en attendant. Tout est opt-in ou correction d'accessibilité ; **un seul
+changement de rendu possible**, écrit plus bas (FormField).
+
+### 1 · `.overline` devient `.ds-overline` — l'ancien nom reste une version, sans collision
+
+**Le défaut.** Livrée en v0.23.0, la classe du sur-titre neutre portait le nom d'un
+utilitaire STATIQUE de Tailwind : `overline` = `text-decoration-line: overline`. Chez l'app,
+le mot écrit dans le code suffisait à faire générer l'utilitaire, en `layer(utilities)` :
+il gagnait, et chaque sur-titre recevait un trait au-dessus. La vitrine du socle elle-même
+portait les deux règles — mesuré dans sa feuille émise. Le site l'avait neutralisé chez lui
+par `@source not inline('overline')`.
+
+**La solution retenue : renommer ET garder l'alias, sans rupture.** `.ds-overline` est le
+nom canonique (le préfixe `ds-` met la classe hors de l'espace de noms de Tailwind).
+`.overline` reste **une version**, en alias déprécié — et c'est possible SANS collision :
+`theme.css` porte désormais `@source not inline("overline")`, qui interdit au scanner de
+générer l'utilitaire natif. Vérifié de trois façons : dans la feuille de la vitrine (une
+seule règle `.overline`, celle du socle), au compilateur (le candidat n'est plus
+construit), et sur le banc Astro avec un consommateur qui n'interdit RIEN lui-même — aucun
+trait. Le prix, borné à cette version : l'utilitaire natif `overline` n'est pas générable
+chez une app qui monte `theme.css` (aucune des trois apps ne s'en sert, vérifié ;
+`[text-decoration-line:overline]` reste possible). **L'alias et l'interdiction partent
+en v0.25.0.**
+
+`Card` / `CardHeader eyebrowTone="neutral"` rendent `ds-overline`.
+
+**Pour que ça ne repasse pas** : `check-utility-collisions.mjs` gagne une seconde famille.
+Il compile `theme.css` tel qu'une app le reçoit et demande au compilateur Tailwind de
+construire CHAQUE classe déclarée par le CSS du socle (256) : une règle produite = un nom
+pris = le garde tombe. La liste des utilitaires natifs est DÉRIVÉE de la version installée
+de Tailwind, jamais recopiée ; un nom n'est toléré que si `theme.css` l'interdit au
+scanner. Jumeau de falsification rejoué à chaque appel (7 cas : `flex`, `hidden`,
+`overline` reconnus ; `ds-overline`, `eyebrow`, `accent` libres ; l'extracteur ignore
+commentaires et `@utility`). Falsifié pour de vrai : retirer la ligne de `theme.css` le
+fait tomber sur `.overline`. **PIEGES § 10.**
+
+### 2 · Calendar — un groupe nommé de boutons, la date complète, le clavier
+
+**Le défaut.** `role="grid"` sans lignes ni cellules : ARIA invalide (Lighthouse
+`aria-required-children`), annoncé de travers. Le site réécrivait le rôle en `group`
+dans un `useEffect`.
+
+**La solution retenue : le groupe nommé**, la plus simple et la plus robuste. Une vraie
+grille ARIA aurait exigé des nœuds `row` dans une mise en page CSS Grid à 7 colonnes —
+donc soit `display:contents` (qui a retiré ces nœuds de l'arbre d'accessibilité dans
+certains navigateurs), soit une réécriture en `subgrid` : un changement de structure
+visible pour gagner une sémantique que le groupe donne déjà. Les jours sont des boutons
+dans `role="group"`, nommé par le mois affiché (`aria-labelledby` sur le libellé).
+Chaque jour annonce sa **date complète** (« lundi 13 octobre 2026 », par `Intl` dans la
+`locale`), **`aria-pressed`** s'il est choisi, **`aria-current="date"`** si c'est
+aujourd'hui, le **`disabled` natif** s'il est indisponible ; en-têtes de semaine et cases
+vides en `aria-hidden`.
+
+**Le clavier**, en plus : UN arrêt de tabulation dans les jours (le jour choisi, sinon
+aujourd'hui, sinon le premier disponible ; puis le dernier jour focalisé), flèches ± 1
+jour / ± 1 semaine, Début / Fin = lundi / dimanche, PageHaut / PageBas = mois (+ Maj :
+année), jours indisponibles sautés, changement de mois au besoin, `min` / `max` jamais
+franchis. Avant : jusqu'à 31 arrêts de tabulation.
+
+**Vérifié** : Lighthouse **100** en accessibilité sur le banc Astro (23 audits passés,
+aucun échec — une première passe à 94 échouait sur deux défauts du BANC, un titre `h1→h3`
+et des liens d'icône de 20 px, corrigés dans le banc) ; arbre d'accessibilité réel de
+Chrome (protocole DevTools) : `group « Octobre 2026 »`, 31 enfants exposés, tous des
+boutons nommés par leur date, `[enfoncé]` sur le jour choisi, `[désactivé]` sur les jours
+fermés — identique en rendu serveur et en îlot `client:only`. Clavier vérifié dans la
+vitrine (flèche bas qui change de mois, PageBas bloqué par `max`, Début qui revient au
+lundi du mois précédent, Tab qui ressort).
+
+**Aucun changement visuel** : mêmes classes, même mise en page, mêmes nœuds de grille.
+
+### 3 · FormField relie lui-même l'aide et l'erreur
+
+Quand l'enfant est UN contrôle — `Input`, `Textarea`, `Select`, `Checkbox`, `Radio`,
+`Switch`, ou un `<input>` / `<select>` / `<textarea>` natif —, FormField pose : son `id`
+s'il n'en a pas (repris de `htmlFor`, sinon généré, et le libellé le vise),
+`aria-describedby` vers l'erreur ou à défaut l'aide (AJOUTÉ à celui de l'enfant, sans
+doublon), `aria-invalid="true"` quand il y a une erreur. L'aide et l'erreur portent un `id`
+stable (`<id>-aide` / `<id>-erreur`). Un enfant composite est laissé tel quel — relevé
+dans Editing, qui passe des listes, une bannière et des squelettes à FormField : rien
+n'y est injecté. Vérifié dans l'arbre de Chrome : `textbox « Ton e-mail » [invalid] —
+décrit par « Cet e-mail a l'air bancal. »`.
+
+**⚠ Le seul changement de rendu possible** : `.ds-input[aria-invalid="true"]` porte déjà
+la bordure rouge. Un champ sous une `error` SANS `invalid` la prend donc désormais — c'est
+l'état que la doctrine demande. Relevé dans les trois apps : **aucune occurrence** (Editing
+passe `invalid` avec `error` ; les autres `error` enveloppent des composites).
+
+### 4 · `ContentIcon variant="filled"`
+
+`variant` : `outline` (défaut — rien ne change sans la prop) · `filled`, les glyphes
+OFFICIELS pleins : YouTube (rectangle arrondi, triangle de lecture en creux), Instagram,
+TikTok — tracés de Simple Icons 16.34.0 (CC0 1.0), même grille 24, reconstruits par
+`createLucideIcon` avec `fill: currentColor` / `stroke: none` sur le tracé. Même `Glyph`,
+même créneau `--ds-icon-size`, `currentColor`, `aria-hidden`. Vérifié en HTML pur sur le
+banc Astro (aucun script) et dans la vitrine (créneau 20 px, dans un bouton-icône).
+
+### Le reste
+
+- **Dépôt déménagé** : la ligne d'installation du README vise
+  `github:Julien-Fernandes/julien-fernandes-design-system` ; le `origin` local aussi ;
+  `Portage-README.md` suit. L'ancienne adresse redirige encore.
+- Vitrine : Fondations (`.ds-overline` et l'alias, sans trait), Data display (la note de
+  `eyebrowTone`), Formulaires (la note d'accessibilité du calendrier, un bloc « Câblage
+  automatique » sans aucun attribut écrit à la main), Icônes (bloc des glyphes pleins).
+- Docs : PROMPTS (Calendar, FormField, ContentIcon, `.ds-overline`), PIEGES (§ 2, § 3,
+  § 10 nouveau), README (classes, garde).
+- `check-portage.sh` : **33 correctifs** — le contrôle du sur-titre suit le nouveau nom,
+  l'interdiction du scanner entre ; recompté.
+- Gabarit : porté en **0.10.0** — les quatre manques sont de l'API, du comportement et de
+  l'accessibilité ; tout se porte (l'alias y vit jusqu'à sa 0.11.0).
+
+**Aucune rupture d'API.** 39 composants, 48 glyphes, 3 icônes de plateforme (et leurs trois
+variantes pleines), quatorze gardes.
+
+**Vérifié avant tag :** typecheck, les treize gardes hors version, `check-portage.sh`,
+`npm run demo:build`, `npm run build`, le banc Astro (build, Lighthouse, arbre de Chrome).
+**Après tag :** `npm run lint` en entier, `demo:build`, `build`.
+
+---
+
 ## 0.23.0 — le site public : menu sans JS, polices locales, et la prose promue
 
 Le lot que décrit `docs/AUDIT-SITE.md` : ce qu'un site public (Astro, rendu statique,

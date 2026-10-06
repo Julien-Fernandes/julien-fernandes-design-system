@@ -81,10 +81,20 @@ img{max-width:100%;display:block}
    PAS FRAGILE, et c'est la raison de son existence séparée : aucune des quatre
    déclarations du pochoir (voir .accent ci-dessous), donc un utilitaire de couleur posé
    sur le même nœud (`text-muted-foreground`) fait exactement ce qu'il dit.
-   UN NŒUD PAR RÔLE : .overline et .eyebrow ne se posent JAMAIS ensemble. Le mélange
+   UN NŒUD PAR RÔLE : .ds-overline et .eyebrow ne se posent JAMAIS ensemble. Le mélange
    produirait un dégradé ou un texte plein selon l'ordre de source — c'est soit l'un,
-   soit l'autre. */
-.overline{font-family:var(--font-body);font-size:var(--text-eyebrow);font-weight:var(--weight-semibold);text-transform:uppercase;letter-spacing:var(--tracking-eyebrow);line-height:var(--leading-snug)}
+   soit l'autre.
+   ⚠️ LE NOM EST `.ds-overline` DEPUIS LA v0.24.0 — et c'est un correctif, pas un goût.
+   Livrée en v0.23.0 sous le nom `.overline`, la classe portait le nom d'un utilitaire
+   STATIQUE de Tailwind (`overline` = `text-decoration-line: overline`). Dès que le mot
+   apparaissait dans le code d'une app, Tailwind générait l'utilitaire, en
+   `layer(utilities)` : il gagnait, et chaque sur-titre recevait un trait AU-DESSUS. Le
+   préfixe `ds-` met la classe hors de l'espace de noms de Tailwind, pour toujours.
+   `.overline` RESTE UNE VERSION, en alias déprécié, et sans collision : `theme.css` interdit
+   au scanner de Tailwind de générer le candidat `overline` (`@source not inline`). Il part
+   en v0.25.0, avec cette interdiction. `check-utility-collisions.mjs` refuse désormais
+   toute classe du socle qui porte le nom d'un utilitaire Tailwind. */
+.ds-overline,.overline{font-family:var(--font-body);font-size:var(--text-eyebrow);font-weight:var(--weight-semibold);text-transform:uppercase;letter-spacing:var(--tracking-eyebrow);line-height:var(--leading-snug)}
 
 /* The signature: ONE gradient word per title. Never two.
    QUATRE DÉCLARATIONS SOLIDAIRES — background, background-clip, color, width. Retirez-en

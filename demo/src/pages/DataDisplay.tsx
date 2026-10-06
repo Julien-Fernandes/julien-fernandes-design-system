@@ -108,7 +108,7 @@ export function DataDisplayPage() {
               title="Sur-titre neutre"
               action={<Badge tone="success" pad="dense" icon={<Icon name="circle-check" strokeWidth={2.5} />}>Actif</Badge>}
             >
-              <p className="caption">eyebrowTone=&quot;neutral&quot; (v0.23.0) rend le sur-titre en .overline — le gabarit d'.eyebrow à l'encre, sans dégradé. Un seul des deux par nœud.</p>
+              <p className="caption">eyebrowTone=&quot;neutral&quot; (v0.23.0) rend le sur-titre en .ds-overline (v0.24.0) — le gabarit d'.eyebrow à l'encre, sans dégradé. Un seul des deux par nœud.</p>
             </Card>
           </Grid>
         </Block>

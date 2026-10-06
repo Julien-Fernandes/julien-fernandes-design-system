@@ -31,10 +31,26 @@
  * de thème produit déjà. Si le nom est pris, on suffixe (`bg-grid-dense`) ou on
  * passe par un jeton plutôt que par un utilitaire.
  *
+ * SECONDE FAMILLE — v0.24.0 : une CLASSE DU SOCLE qui porte le nom d'un utilitaire NATIF.
+ * Le sur-titre neutre est sorti en v0.23.0 sous le nom `.overline` — qui est AUSSI un
+ * utilitaire statique de Tailwind (`text-decoration-line: overline`). Chez l'app, dès que
+ * le mot apparaissait dans son code, Tailwind générait l'utilitaire en `layer(utilities)` :
+ * il gagnait sur la classe du socle (`layer(base)`), et chaque sur-titre recevait un trait
+ * au-dessus. Ni le build, ni les types, ni la vitrine ne l'ont vu — la vitrine elle-même
+ * portait les deux règles. C'est le site qui l'a remonté.
+ * Le contrôle DÉRIVE la vérité au lieu de la recopier : il compile `theme.css` exactement
+ * comme une app le reçoit, puis demande au compilateur Tailwind de construire chaque nom
+ * de classe déclaré par le CSS du socle. Si le compilateur en sort une règle, le nom est
+ * pris. Un candidat que `theme.css` interdit au scanner (`@source not inline`) n'est plus
+ * généré : c'est la seule façon légitime de garder un tel nom — le temps d'un alias.
+ * Jumeau de falsification rejoué à chaque appel : un détecteur qui ne reconnaît plus
+ * `flex` rendrait le garde toujours vert, donc décoratif.
+ *
  * Lancé par `npm run lint`.
  */
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { createRequire } from 'node:module';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ICI = fileURLToPath(new URL('.', import.meta.url));
@@ -203,6 +219,107 @@ for (const { nom, file, ligne } of utils) {
     }
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+ * SECONDE FAMILLE — les classes du socle face aux utilitaires NATIFS de Tailwind.
+ * ══════════════════════════════════════════════════════════════════════════════ */
+
+/** Les noms de classe DÉCLARÉS par une feuille : ceux des sélecteurs, jamais ceux qu'un
+ *  commentaire ou une valeur mentionne. Le prélude de chaque `{` est lu ; les at-rules
+ *  (`@media`, `@layer`, `@utility`…) n'en sont pas. */
+function classesDeclarees(source) {
+  const noms = new Set();
+  const propre = sansCommentaires(source);
+  const re = /([^{};]*)\{/g;
+  let m;
+  while ((m = re.exec(propre)) !== null) {
+    const prelude = m[1].trim();
+    if (!prelude || prelude.startsWith('@')) continue;
+    for (const c of prelude.matchAll(/\.(-?[_a-zA-Z][\w-]*)/g)) noms.add(c[1]);
+  }
+  return noms;
+}
+
+const require = createRequire(import.meta.url);
+let compile;
+try { ({ compile } = await import('tailwindcss')); }
+catch {
+  console.error('\n✗ tailwindcss introuvable — le contrôle des noms natifs ne peut pas tourner.\n');
+  process.exit(1);
+}
+async function loadStylesheet(id, base) {
+  const chemin = id.startsWith('.') ? resolve(base, id) : require.resolve(id, { paths: [base] });
+  return { path: chemin, base: dirname(chemin), content: readFileSync(chemin, 'utf8') };
+}
+const THEME = join(ROOT, 'theme.css');
+async function compilateur(css) {
+  return compile(css, { base: ROOT, loadStylesheet });
+}
+/** Les noms, parmi `noms`, pour lesquels le compilateur sort une règle `.nom{…}`. */
+function natifs(compiled, noms) {
+  const sortie = compiled.build([...noms]);
+  const pris = new Set();
+  for (const m of sortie.matchAll(/(?:^|[\s,}])\.([\w-]+)\s*\{/g)) if (noms.has(m[1])) pris.add(m[1]);
+  return pris;
+}
+
+/* Le jumeau de falsification — rejoué à chaque appel, AVANT de juger le dépôt. */
+const themeSource = readFileSync(THEME, 'utf8');
+const sansInterdits = themeSource.replace(/^[ \t]*@source\s+not\s+inline\([^)]*\);?/gm, '');
+const temoin = await compilateur(sansInterdits);
+const casTemoins = new Set(['flex', 'hidden', 'overline', 'ds-overline', 'eyebrow', 'accent']);
+const vusTemoins = natifs(temoin, casTemoins);
+const extraits = classesDeclarees('/* .commentaire{} */ .a,.b:hover>.c{x:1} @media (x){.d{y:2}} @utility e{z:3}');
+const falsification = [
+  ['`flex` reconnu natif', vusTemoins.has('flex')],
+  ['`hidden` reconnu natif', vusTemoins.has('hidden')],
+  ['`overline` reconnu natif sans interdiction', vusTemoins.has('overline')],
+  ['`ds-overline` reconnu libre', !vusTemoins.has('ds-overline')],
+  ['`eyebrow` reconnu libre', !vusTemoins.has('eyebrow')],
+  ['`accent` nu reconnu libre', !vusTemoins.has('accent')],
+  ['extracteur : a, b, c, d — et ni commentaire ni @utility', ['a', 'b', 'c', 'd'].every((n) => extraits.has(n)) && !extraits.has('commentaire') && !extraits.has('e')],
+];
+const rate = falsification.filter(([, ok]) => !ok);
+if (rate.length) {
+  console.error('\n✗ jumeau de falsification — le détecteur de noms natifs ne voit plus juste :');
+  for (const [cas] of rate) console.error('    ' + cas);
+  console.error('  Un détecteur aveugle rend le garde toujours vert : corrige-le avant tout.\n');
+  process.exit(1);
+}
+
+/* Le jugement : les classes déclarées par le CSS du socle, compilées contre theme.css TEL
+   QU'UNE APP LE REÇOIT — interdictions comprises. */
+const declarees = new Map();
+for (const file of walk(ROOT)) {
+  for (const nom of classesDeclarees(readFileSync(file, 'utf8'))) {
+    if (!declarees.has(nom)) declarees.set(nom, relative(ICI, file));
+  }
+}
+const reel = await compilateur(themeSource);
+const prises = natifs(reel, new Set(declarees.keys()));
+const tolerees = [...natifs(temoin, new Set(declarees.keys()))].filter((n) => !prises.has(n));
+
+if (collisions.length === 0 && prises.size === 0) {
+  console.log(
+    `✓ utilitaires : aucun des ${utils.length} @utility ne recouvre une classe générée ` +
+      `par l un des ${cles.size} jetons de thème · aucune des ${declarees.size} classes du socle ` +
+      `ne porte le nom d un utilitaire natif` +
+      (tolerees.length ? ` (${tolerees.map((n) => '.' + n).join(', ')} : interdit au scanner, alias à durée limitée)` : '') +
+      ` · jumeau prouvé sur ${falsification.length} cas`,
+  );
+  process.exit(0);
+}
+
+for (const nom of prises) {
+  console.error(
+    `\n✗ ${declarees.get(nom)} déclare la classe « .${nom} » — c'est AUSSI un utilitaire natif de Tailwind.\n` +
+      `    Chez l'app, dès que le mot apparaît dans son code, Tailwind génère l'utilitaire en\n` +
+      `    layer(utilities) : il gagne sur la classe du socle, en silence (le cas .overline, v0.23.0).\n` +
+      `    Renomme-la avec le préfixe « ds- ». Un ancien nom ne survit qu'en alias, une version,\n` +
+      `    avec @source not inline("${nom}") dans theme.css.`,
+  );
+}
+if (prises.size && collisions.length === 0) { console.error(''); process.exit(1); }
 
 if (collisions.length === 0) {
   console.log(

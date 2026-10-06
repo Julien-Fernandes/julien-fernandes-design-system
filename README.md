@@ -58,7 +58,7 @@ gabarit, dont la marque d'exemple est froide et n'est celle de personne.)
 Pas de registry : chaque app épingle une version par un tag git.
 
 ```bash
-npm i github:Yamiro02/julien-fernandes-design-system#v0.23.0
+npm i github:Julien-Fernandes/julien-fernandes-design-system#v0.24.0
 ```
 
 Cinq **peer dependencies**, à la charge de l'app :
@@ -262,7 +262,7 @@ de Tailwind, sur laquelle reposent les composants shadcn de ton app.
 > ```
 
 `tokens/base.css` fournit aussi des classes prêtes à l'emploi : `.display` `.display-xl` `.eyebrow`
-`.overline` (le sur-titre neutre, v0.23.0) `.chip` `.accent` `.mono` `.caption` `.prose` `.halo`
+`.ds-overline` (le sur-titre neutre, v0.24.0 — `.overline` en alias déprécié jusqu'à la v0.25.0) `.chip` `.accent` `.mono` `.caption` `.prose` `.halo`
 (+ `.halo--wide` / `.halo--contained`, v0.23.0) `.page` `.ds-logo`. Et `patterns.css` la
 typographie de flux **`.ds-prose`** (v0.23.0) : posée sur le conteneur d'un texte suivi —
 rendu Markdown, page légale —, elle en règle titres, paragraphes, listes, liens, code et
@@ -360,7 +360,10 @@ ni `text-primary-readable` pour dire « actif ».
 Vient ensuite, entre autres, [`check-utility-collisions.mjs`](check-utility-collisions.mjs), qui
 refuse tout `@utility` de `theme.css` portant le nom d'une classe qu'un jeton de thème génère
 déjà : en Tailwind v4 les deux déclarations **fusionnent** dans la même règle et la dernière gagne,
-sans erreur ni avertissement.
+sans erreur ni avertissement. Depuis la v0.24.0, il refuse aussi toute **classe du socle qui porte le nom d'un
+utilitaire natif** de Tailwind (le cas `.overline`, PIEGES § 10) : il compile `theme.css` et
+demande au compilateur de construire chaque nom — la liste des natifs est dérivée de la version
+installée, jamais recopiée.
 
 **Trois gardes lisent le CODE, pas le CSS** — [`check-dead-utilities.mjs`](check-dead-utilities.mjs),
 [`check-font-px.mjs`](check-font-px.mjs) et [`check-fragile-classes.mjs`](check-fragile-classes.mjs).

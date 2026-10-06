@@ -1,4 +1,4 @@
-import { Icon, type IconName } from '@julienfernandes/ds';
+import { Icon, IconButton, type IconName } from '@julienfernandes/ds';
 import { ContentIcon, type ContentIconName } from '@julienfernandes/ds/brand-content';
 import { Block, Section, Spec } from '../ui';
 
@@ -64,6 +64,33 @@ export function IconsPage() {
           </div>
           <div className="flex flex-wrap items-center gap-space-5">
             {PLATEFORMES.map(name => <ContentIcon key={name} name={name} size="1.5rem" />)}
+          </div>
+        </Block>
+
+        <Block label="Glyphes pleins — variant=&quot;filled&quot;" hint="v0.24.0. Les logos OFFICIELS en aplat (Simple Icons, CC0) : le YouTube plein est le rectangle arrondi avec le triangle de lecture EN CREUX. Défaut : outline — rien ne change sans la prop. Même créneau de taille (--ds-icon-size), même currentColor : les deux dernières rangées le montrent, l'une en taille de créneau, l'autre dans un bouton-icône.">
+          <div className="grid grid-cols-2 gap-space-3 sm:grid-cols-4 lg:grid-cols-6">
+            {PLATEFORMES.map(name => (
+              <div key={name} className="flex flex-col items-center gap-space-2 rounded-md border border-border bg-card p-space-3">
+                <ContentIcon name={name} variant="filled" size="1.25rem" />
+                <span className="mono text-caption text-text-muted w-full truncate text-center">{name} · filled</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-wrap items-center gap-space-5">
+            {PLATEFORMES.map(name => (
+              <span key={name} className="flex items-center gap-space-3">
+                <ContentIcon name={name} size="2rem" />
+                <ContentIcon name={name} variant="filled" size="2rem" />
+              </span>
+            ))}
+            <span className="flex items-center gap-space-3 text-primary-readable">
+              {PLATEFORMES.map(name => <ContentIcon key={name} name={name} variant="filled" />)}
+            </span>
+            <span className="flex items-center gap-space-2">
+              {PLATEFORMES.map(name => (
+                <IconButton key={name} variant="secondary" label={name}><ContentIcon name={name} variant="filled" /></IconButton>
+              ))}
+            </span>
           </div>
         </Block>
       </Section>

@@ -13,7 +13,7 @@
 
 | | |
 |---|---|
-| Dépôt | `Yamiro02/julien-fernandes-design-system` · branche `main` |
+| Dépôt | `Julien-Fernandes/julien-fernandes-design-system` · branche `main` (anciennement `Yamiro02/…`, redirigé) |
 | Paquet | `@julienfernandes/ds` |
 | **Version publiée** | **0.4.0** — Pastille, ActionSheet, Badge dense, en-tête de Card, Modal 3 phases + feuille basse, switch. Le prochain lot est **0.4.1**. |
 | **Mécanisme de thème** | **Tailwind v4 SEUL.** La couche utilitaire vit dans `src/styles/theme.css`, en `@theme inline`, exportée sous `./theme.css`. |

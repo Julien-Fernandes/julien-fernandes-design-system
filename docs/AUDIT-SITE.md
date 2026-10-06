@@ -7,6 +7,11 @@
 > `ink`) ; B10 descend `display-xl` à 3,25rem (la valeur de l'échelle) et non 2,75 ; B13
 > pose `scroll-padding-top` sur la racine. M4 vérifié et non confirmé ; M1, B3, B11, B16
 > non faits. Ce fichier reste dans le dépôt mais ne part pas dans le paquet.
+>
+> **Suite — v0.24.0** : les quatre manques remontés par le site après sa montée en v0.23.0
+> — `.overline` → `.ds-overline` (collision avec l'utilitaire Tailwind `overline`),
+> Calendar en groupe nommé accessible au clavier, FormField qui câble aide et erreur,
+> `ContentIcon variant="filled"`. Voir le CHANGELOG.
 
 Session 1 du plan du site (`site/PROJECT-CONTEXT.md` § 10) : audit maquettes ↔ DS, **sans
 code**. Aucun composant modifié, aucune version bumpée. Ce fichier est le seul ajout.

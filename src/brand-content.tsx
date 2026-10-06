@@ -14,7 +14,7 @@
  * ══════════════════════════════════════════════════════════════════════════════
  */
 import type { LucideIcon } from 'lucide-react';
-import { Instagram, Tiktok, Youtube } from './components/icons/brand-glyphs';
+import { Instagram, InstagramFilled, Tiktok, TiktokFilled, Youtube, YoutubeFilled } from './components/icons/brand-glyphs';
 import type { CSSProperties, JSX } from 'react';
 import { Glyph, type GlyphProps } from './components/icons/Icon';
 import { Halo, type HaloProps } from './components/brand/Halo';
@@ -50,9 +50,27 @@ const CONTENT_ICONS: Record<ContentIconName, LucideIcon> = {
   'tiktok': Tiktok,
 };
 
-export interface ContentIconProps extends Omit<GlyphProps, 'glyph'> { name: ContentIconName }
+/**
+ * LES GLYPHES PLEINS — v0.24.0. Les logos officiels en aplat (YouTube : le rectangle
+ * arrondi, le triangle en creux). Mêmes trois noms, même taille, même currentColor.
+ */
+const CONTENT_ICONS_FILLED: Record<ContentIconName, LucideIcon> = {
+  'youtube': YoutubeFilled,
+  'instagram': InstagramFilled,
+  'tiktok': TiktokFilled,
+};
 
-export function ContentIcon({ name, ...rest }: ContentIconProps): JSX.Element | null {
-  const glyph = CONTENT_ICONS[name];
+export interface ContentIconProps extends Omit<GlyphProps, 'glyph'> {
+  name: ContentIconName;
+  /**
+   * `outline` (défaut) = le contour au trait de 2, celui d'avant la v0.24.0 — rien ne
+   * change pour qui ne passe pas la prop. `filled` = le glyphe officiel plein de la
+   * plateforme. `strokeWidth` est sans effet sur un glyphe plein.
+   */
+  variant?: 'outline' | 'filled';
+}
+
+export function ContentIcon({ name, variant = 'outline', ...rest }: ContentIconProps): JSX.Element | null {
+  const glyph = (variant === 'filled' ? CONTENT_ICONS_FILLED : CONTENT_ICONS)[name];
   return glyph ? <Glyph glyph={glyph} {...rest} /> : null;
 }

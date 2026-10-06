@@ -28,7 +28,8 @@ export interface CardHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 't
   eyebrow?: ReactNode;
   /**
    * Le ton du sur-titre (v0.23.0). `brand` (défaut) = `.eyebrow`, le dégradé de marque ;
-   * `neutral` = `.overline`, le même gabarit à l'encre (`currentColor`) — le libellé de
+   * `neutral` = `.ds-overline` (v0.24.0 ; `.overline` en v0.23.0), le même gabarit à
+   * l'encre (`currentColor`) — le libellé de
    * section d'une carte de réglages, d'une fiche. Un seul des deux par nœud, jamais les deux.
    */
   eyebrowTone?: 'brand' | 'neutral';
@@ -77,7 +78,7 @@ export function CardHeader({
       {icon}
       {(eyebrow || title || subtitle) ? (
         <div className="ds-card__header-main">
-          {eyebrow ? <span className={eyebrowTone === 'neutral' ? 'overline' : 'eyebrow'}>{eyebrow}</span> : null}
+          {eyebrow ? <span className={eyebrowTone === 'neutral' ? 'ds-overline' : 'eyebrow'}>{eyebrow}</span> : null}
           {title ? (
             <h3 className={['ds-card__title', titleSize === 'lg' ? 'ds-card__title--lg' : ''].filter(Boolean).join(' ')}>
               {title}

@@ -1,11 +1,26 @@
-import { useEffect, useState } from 'react';
-import type { HTMLAttributes, JSX } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import type { HTMLAttributes, JSX, KeyboardEvent } from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../icons/Icon';
 
 /**
  * Month view, Monday-first, fr locale by default. Native Date + Intl only.
  * Selected day = --primary fill; today = --primary bold. Single date — no range.
+ *
+ * L'ACCESSIBILITÉ — v0.24.0. Jusqu'à la v0.23.0, les jours vivaient dans un
+ * `role="grid"` sans lignes ni cellules : ARIA invalide (Lighthouse
+ * `aria-required-children`), et annoncé de travers. La grille est désormais ce qu'elle
+ * est : un GROUPE de boutons, nommé par le mois affiché. Chaque jour annonce sa date
+ * COMPLÈTE (« lundi 13 octobre 2026 », dans la `locale`), l'état sélectionné
+ * (`aria-pressed`), le jour courant (`aria-current="date"`) et l'indisponibilité (le
+ * `disabled` natif). Les en-têtes de semaine sont décoratifs (`aria-hidden`) : le nom du
+ * jour est dans chaque libellé.
+ * Le CLAVIER : un seul arrêt de tabulation dans les jours (le jour choisi, sinon
+ * aujourd'hui, sinon le premier jour disponible) ; les flèches déplacent d'un jour ou
+ * d'une semaine, Début/Fin vont au lundi/dimanche, PageHaut/PageBas changent de mois
+ * (+ Maj : d'année) — en sautant les jours indisponibles, en changeant de mois au
+ * besoin, sans jamais sortir de `min` / `max`. Entrée ou Espace choisit.
+ * Aucun changement visuel : même DOM de mise en page, mêmes classes.
  */
 export interface CalendarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   value?: Date;
@@ -39,6 +54,11 @@ const strip = (d?: Date | null): Date | null =>
   d ? new Date(d.getFullYear(), d.getMonth(), d.getDate()) : null;
 const key = (d?: Date | null): string =>
   d ? d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate() : '';
+const plusJours = (d: Date, n: number): Date => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+const plusMois = (d: Date, n: number): Date => {
+  const dernier = new Date(d.getFullYear(), d.getMonth() + n + 1, 0).getDate();
+  return new Date(d.getFullYear(), d.getMonth() + n, Math.min(d.getDate(), dernier));
+};
 
 export function Calendar({
   value, onChange, min, max, disabledDates = [], locale = 'fr-FR', bare = false, fluid = false,
@@ -58,30 +78,89 @@ export function Calendar({
   const isDisabled = (d: Date) => (!!lo && d < lo) || (!!hi && d > hi) || badKeys.has(key(d));
   const move = (m?: number, y?: number) => setView(v => new Date(v.getFullYear() + (y || 0), v.getMonth() + (m || 0), 1));
   const selKey = key(strip(value));
+  const fmtComplet = new Intl.DateTimeFormat(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const idMois = 'ds-cal' + useId().replace(/[^a-zA-Z0-9_-]/g, '') + '-mois';
+
+  /* LE JOUR QUI PORTE L'ARRÊT DE TABULATION (tabindex 0) — tous les autres sont à -1.
+     Le dernier jour focalisé s'il est dans la vue, sinon le jour choisi, sinon aujourd'hui,
+     sinon le premier jour disponible du mois. */
+  const [actif, setActif] = useState<string | null>(null);
+  const jours = Array.from({ length: count }, (_, i) => new Date(view.getFullYear(), view.getMonth(), i + 1));
+  const libres = jours.filter(d => !isDisabled(d)).map(key);
+  const arret = [actif, selKey, key(today)].find(k => k && libres.includes(k)) ?? libres[0];
+
+  /* Un déplacement au clavier vers un autre mois change la vue, PUIS rend le focus au jour
+     visé — après le rendu, quand son bouton existe. */
+  const boutons = useRef(new Map<string, HTMLButtonElement>());
+  const aFocaliser = useRef<string | null>(null);
+  useEffect(() => {
+    if (!aFocaliser.current) return;
+    boutons.current.get(aFocaliser.current)?.focus();
+    aFocaliser.current = null;
+  });
+
+  const clavier = (e: KeyboardEvent<HTMLButtonElement>, d: Date): void => {
+    let cible: Date;
+    let pas: 1 | -1;
+    switch (e.key) {
+      case 'ArrowLeft': cible = plusJours(d, -1); pas = -1; break;
+      case 'ArrowRight': cible = plusJours(d, 1); pas = 1; break;
+      case 'ArrowUp': cible = plusJours(d, -7); pas = -1; break;
+      case 'ArrowDown': cible = plusJours(d, 7); pas = 1; break;
+      case 'Home': cible = plusJours(d, -((d.getDay() + 6) % 7)); pas = 1; break;
+      case 'End': cible = plusJours(d, 6 - ((d.getDay() + 6) % 7)); pas = -1; break;
+      case 'PageUp': cible = plusMois(d, e.shiftKey ? -12 : -1); pas = 1; break;
+      case 'PageDown': cible = plusMois(d, e.shiftKey ? 12 : 1); pas = 1; break;
+      default: return;
+    }
+    e.preventDefault();
+    /* Un jour indisponible se saute, dans le sens du déplacement — jamais au-delà des
+       bornes, jamais plus d'un an : au pire, le focus ne bouge pas. */
+    for (let n = 0; n < 366 && isDisabled(cible); n++) {
+      if ((lo && cible < lo && pas < 0) || (hi && cible > hi && pas > 0)) return;
+      cible = plusJours(cible, pas);
+    }
+    if (isDisabled(cible)) return;
+    const k = key(cible);
+    setActif(k);
+    if (cible.getMonth() !== view.getMonth() || cible.getFullYear() !== view.getFullYear()) {
+      aFocaliser.current = k;
+      setView(new Date(cible.getFullYear(), cible.getMonth(), 1));
+    } else {
+      boutons.current.get(k)?.focus();
+    }
+  };
+
   return (
     <div className={cn('ds-cal', bare && 'ds-cal--bare', fluid && 'ds-cal--fluid', className)} {...rest}>
       <div className="ds-cal__head">
         <button type="button" className="ds-cal__nav" aria-label="Année précédente" onClick={() => move(0, -1)}><Icon name="chevrons-left" size="1rem" /></button>
         <button type="button" className="ds-cal__nav" aria-label="Mois précédent" onClick={() => move(-1, 0)}><Icon name="chevron-left" size="1rem" /></button>
-        <span className="ds-cal__label" aria-live="polite">{fmtMonth.format(view)}</span>
+        <span className="ds-cal__label" id={idMois} aria-live="polite">{fmtMonth.format(view)}</span>
         <button type="button" className="ds-cal__nav" aria-label="Mois suivant" onClick={() => move(1, 0)}><Icon name="chevron-right" size="1rem" /></button>
         <button type="button" className="ds-cal__nav" aria-label="Année suivante" onClick={() => move(0, 1)}><Icon name="chevrons-right" size="1rem" /></button>
       </div>
-      <div className="ds-cal__grid" role="grid">
-        {heads.map(h => <span key={h} className="ds-cal__wd">{h}</span>)}
-        {Array.from({ length: offset }, (_, i) => <span key={'b' + i} />)}
-        {Array.from({ length: count }, (_, i) => {
-          const d = new Date(view.getFullYear(), view.getMonth(), i + 1);
+      <div className="ds-cal__grid" role="group" aria-labelledby={idMois}>
+        {heads.map(h => <span key={h} className="ds-cal__wd" aria-hidden="true">{h}</span>)}
+        {Array.from({ length: offset }, (_, i) => <span key={'b' + i} aria-hidden="true" />)}
+        {jours.map((d, i) => {
           const k = key(d);
-          const cls = cn('ds-cal__day', k === selKey && 'is-selected', k === key(today) && 'is-today');
+          const estAujourdhui = k === key(today);
+          const cls = cn('ds-cal__day', k === selKey && 'is-selected', estAujourdhui && 'is-today');
           return (
             <button
               key={k}
+              ref={el => { if (el) boutons.current.set(k, el); else boutons.current.delete(k); }}
               type="button"
               className={cls}
               disabled={isDisabled(d)}
+              tabIndex={k === arret ? 0 : -1}
+              aria-label={fmtComplet.format(d)}
               aria-pressed={k === selKey || undefined}
+              aria-current={estAujourdhui ? 'date' : undefined}
               onClick={() => onChange && onChange(d)}
+              onFocus={() => setActif(k)}
+              onKeyDown={e => clavier(e, d)}
             >
               {i + 1}
             </button>

@@ -54,7 +54,7 @@ reprise en aveugle est une valeur recopiée.
   (`.ds-label__required`, `.ds-dropdown__hint`).
 
 **⚠️ Les utilitaires de marque perdent contre les composants.** Les neuf de
-`tokens/base.css` — `.display`, `.display-xl`, `.eyebrow`, `.overline`, `.chip`, `.accent`,
+`tokens/base.css` — `.display`, `.display-xl`, `.eyebrow`, `.ds-overline`, `.chip`, `.accent`,
 `.mono`, `.caption`, `.prose` — vivent en `layer(base)` ; toutes les règles de `patterns.css`
 vivent en `layer(components)` et gagnent toujours sur le même nœud, quelle que soit la
 spécificité. `.mono` posé sur un nœud qu'une règle `.ds-*` typographie ne rend rien, en
@@ -69,10 +69,12 @@ casser à l'écran. **Dangereux** : couleur, fond, `background-clip`, dimension 
 couleur, `bg-*`, `w-*`…) — le dégradé meurt en silence. **Sans risque** : la typographie
 (`font-*`, paliers `text-heading`…, `leading-*`). La mise en page va sur un span externe.
 
-**Le sur-titre NEUTRE est `.overline`** (v0.23.0) : le gabarit exact d'`.eyebrow` (taille,
+**Le sur-titre NEUTRE est `.ds-overline`** (v0.24.0 ; `.overline` en v0.23.0, alias déprécié
+jusqu'à la v0.25.0 — l'ancien nom est aussi celui d'un utilitaire Tailwind, voir PIEGES § 10) :
+le gabarit exact d'`.eyebrow` (taille,
 graisse, capitales, interlettrage), sans le pochoir — il rend en `currentColor`, donc un
 utilitaire de couleur posé dessus (`text-muted-foreground`) fait ce qu'il dit, et il n'est
-PAS fragile. Un nœud par rôle : `.overline` OU `.eyebrow`, jamais les deux. Dans une
+PAS fragile. Un nœud par rôle : `.ds-overline` OU `.eyebrow`, jamais les deux. Dans une
 `Card` / un `CardHeader`, c'est `eyebrowTone="neutral"`.
 
 **La typographie de flux est `.ds-prose`** (v0.23.0, `layer(components)`) : une classe sur
@@ -305,7 +307,7 @@ sous 1.5rem.
   padding, media plein bord — et l'en-tête à filet s'il y a un slot) · slots d'en-tête
   `eyebrow` / `icon` / `title` / `subtitle` / `action` · `titleSize` (`sm·lg`) ·
   `headerGap` (`normal·airy`) · `as` · `eyebrowTone` (`brand·neutral`, v0.23.0 — `neutral`
-  rend le sur-titre en `.overline`, à l'encre) · `href` / `target` / `rel` (v0.23.0, la
+  rend le sur-titre en `.ds-overline`, à l'encre) · `href` / `target` / `rel` (v0.23.0, la
   carte-lien — rend un `<a>`).
 - **`CardHeader` est exporté** (v0.21.0), du même fichier : c'est UN SEUL en-tête au socle
   — `Card` le compose par ses props, `Modal` le rend (pastille · titre + sous-titre ·
@@ -588,6 +590,17 @@ popover.
   PIEGES.md § 9.
 - États rendus : jour au repos, survolé, sélectionné (aplat `--primary`), aujourd'hui
   (`--primary-readable` gras), désactivé, focus-visible.
+- **Accessibilité** (v0.24.0). Les jours forment un **groupe** nommé par le mois affiché
+  (`role="group"` + `aria-labelledby` — plus de `role="grid"` sans lignes ni cellules).
+  Chaque jour annonce sa date COMPLÈTE (« lundi 13 octobre 2026 », dans la `locale`),
+  `aria-pressed` s'il est choisi, `aria-current="date"` si c'est aujourd'hui, et le
+  `disabled` natif s'il est indisponible ; les en-têtes de semaine sont `aria-hidden`.
+- **Clavier** (v0.24.0) : UN arrêt de tabulation dans les jours — le jour choisi, sinon
+  aujourd'hui, sinon le premier jour disponible. Flèches : ± 1 jour, ± 1 semaine ;
+  Début / Fin : lundi / dimanche ; PageHaut / PageBas : mois précédent / suivant (+ Maj :
+  année). Les jours indisponibles sont sautés, le mois change si besoin, `min` / `max` ne
+  sont jamais franchis. Entrée ou Espace choisit. **Ne recâblez pas les rôles** à la main
+  depuis l'app.
 - **Pas de plage.** En attendant un mode plage (périmètre envisagé : deux mois,
   surlignage des jours intermédiaires, présélections externes),
   un calendrier fait main peut émettre lui-même les classes du socle et hériter de ses
@@ -677,6 +690,19 @@ l'anatomie.
 ```
 
 - Props : `label` · `htmlFor` · `help` · `error` · `required` (astérisque `--primary`).
+- **Le câblage est automatique** (v0.24.0). Quand l'enfant est UN contrôle — `Input`,
+  `Textarea`, `Select`, `Checkbox`, `Radio`, `Switch`, ou un `<input>` / `<select>` /
+  `<textarea>` natif —, FormField lui pose son `id` s'il n'en a pas (repris de `htmlFor`,
+  sinon généré ; le libellé le vise), `aria-describedby` vers l'erreur ou à défaut l'aide
+  (AJOUTÉ à celui que l'enfant porte déjà), et `aria-invalid="true"` quand il y a une
+  erreur. **N'écrivez plus ces attributs à la main**, ni d'`id` sur le message d'erreur :
+  le message serait annoncé deux fois.
+- `aria-invalid` porte la bordure rouge de `.ds-input` (règle existante) : un champ sous
+  une `error` la prend désormais même sans `invalid` — c'est l'état que la doctrine
+  demande (« toujours avec un message d'erreur », et réciproquement).
+- Un enfant **composite** (une liste, un groupe, un composant d'app) est laissé tel quel —
+  rien ne prouve qu'il transmet ces attributs. L'aide et l'erreur portent un `id` stable,
+  `<id du champ>-aide` / `<id du champ>-erreur`, pour un câblage à la main.
 
 ## Input
 
@@ -863,9 +889,18 @@ logo entre ici, au deuxième demandeur, jamais dans l'app.
 <ContentIcon name="instagram" size="1.5rem" />
 ```
 
-- Props : `name` (`ContentIconName`) · `size` (longueur CSS, toujours rem — omise, le
-  créneau décide) · `strokeWidth` · `className` · `style`. Rendu `aria-hidden` : le nom
-  accessible est celui du bouton ou du lien qui la porte.
+- Props : `name` (`ContentIconName`) · `variant` (v0.24.0 : `outline`, le défaut, le
+  contour au trait de 2 · `filled`, le glyphe OFFICIEL plein de la plateforme — YouTube :
+  rectangle arrondi, triangle de lecture en creux) · `size` (longueur CSS, toujours rem —
+  omise, le créneau décide) · `strokeWidth` (sans effet sur `filled`) · `className` ·
+  `style`. Rendu `aria-hidden` : le nom accessible est celui du bouton ou du lien qui la
+  porte.
+
+```tsx
+<IconButton as="a" href="https://youtube.com/@chaine" label="YouTube">
+  <ContentIcon name="youtube" variant="filled" />
+</IconButton>
+```
 
 ## HaloHot
 

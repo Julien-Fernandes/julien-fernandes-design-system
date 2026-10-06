@@ -87,7 +87,7 @@ sur son propre `src/`.
 ## 2 · Les utilitaires de marque perdent contre les composants
 
 **Ce qui casse.** Les neuf utilitaires de `tokens/base.css` — `.display`, `.display-xl`,
-`.eyebrow`, `.overline`, `.chip`, `.accent`, `.mono`, `.caption`, `.prose` — vivent en
+`.eyebrow`, `.ds-overline`, `.chip`, `.accent`, `.mono`, `.caption`, `.prose` — vivent en
 `layer(base)`.
 **Toutes** les règles de `patterns.css` vivent en `layer(components)`. Sur un même nœud, la
 couche des composants gagne **toujours**, quelle que soit la spécificité. (Pas de décompte
@@ -138,9 +138,9 @@ ré-exporté qui l'a rattrapé, pas un contrôle.
 **Sans risque, en revanche** : la typographie pure — `font-*`, les paliers `text-heading`…,
 `leading-*`. Elle ne touche à aucune des quatre déclarations.
 
-**Le sur-titre neutre n'a pas ce piège** : `.overline` (v0.23.0) reprend le gabarit
+**Le sur-titre neutre n'a pas ce piège** : `.ds-overline` (v0.24.0) reprend le gabarit
 d'`.eyebrow` sans le pochoir, en `currentColor` — un utilitaire de couleur posé dessus
-fait ce qu'il dit. Mais un nœud par rôle : jamais `.overline` et `.eyebrow` ensemble.
+fait ce qu'il dit. Mais un nœud par rôle : jamais `.ds-overline` et `.eyebrow` ensemble.
 
 **La parade — structurelle, deux spans.** L'externe porte la mise en page et la typo, que
 l'enfant **hérite** ; l'interne ne porte que la classe et le texte.
@@ -345,6 +345,38 @@ rendu que le socle ne voit pas.
 
 > *Admission :* la cause est le `new Date()` de `Calendar.tsx`, **dans le paquet**. Sans
 > lui, aucune date de rendu ne serait gravée. Le critère passe.
+
+---
+
+## 10 · Une classe du socle qui porte le nom d'un utilitaire Tailwind
+
+**Ce qui casse.** Le sur-titre neutre est sorti en v0.23.0 sous le nom `.overline`. Or
+`overline` est AUSSI un utilitaire statique de Tailwind : `text-decoration-line:
+overline`. Chez l'app, dès que le mot apparaît dans son code — et il y apparaît
+forcément, puisqu'on écrit la classe —, le scanner de Tailwind génère l'utilitaire, en
+`layer(utilities)`. Il gagne sur la classe du socle (`layer(base)`, piège 2), et chaque
+sur-titre reçoit un trait AU-DESSUS du texte.
+
+**Pourquoi la panne est muette.** Les deux règles sont légitimes et rendent ce qu'elles
+disent ; aucune ne casse l'autre en entier. Le texte reste lisible, à la bonne taille, en
+capitales — avec un filet en plus, qui se lit comme un choix graphique. La vitrine du
+socle elle-même portait les deux règles sans que personne le voie ; c'est le site qui l'a
+remonté.
+
+**La parade.** Toute classe du socle prend le préfixe `ds-` dès qu'elle n'est pas un
+utilitaire de marque historique — `.ds-overline` depuis la v0.24.0. Un ancien nom ne
+survit qu'en **alias, une version**, et seulement si `theme.css` interdit au scanner de
+générer le candidat natif (`@source not inline("overline")`) : c'est le cas de `.overline`
+jusqu'à la v0.25.0. **Côté app** : écrire `ds-overline`, et retirer tout
+`@source not inline('overline')` posé à la main — `theme.css` le porte.
+
+**Le garde.** `check-utility-collisions.mjs`, seconde famille (v0.24.0) : il compile
+`theme.css` tel qu'une app le reçoit et demande au compilateur Tailwind de construire
+chaque classe déclarée par le CSS du socle ; une règle produite = un nom pris. Il
+**dérive** donc la liste des utilitaires natifs de la version installée de Tailwind, au
+lieu de la recopier, et rejoue son jumeau de falsification à chaque appel (`flex` et
+`overline` doivent être reconnus, `ds-overline` et `eyebrow` libres). Retirer la ligne
+`@source not inline` de `theme.css` le fait tomber — vérifié.
 
 ---
 

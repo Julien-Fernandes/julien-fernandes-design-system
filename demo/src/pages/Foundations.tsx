@@ -71,7 +71,8 @@ export function Foundations() {
           <Spec token="--text-control · boutons, champs, chips, onglets"><span className="text-control font-semibold">Voir la chaîne</span></Spec>
           <Spec token="--text-caption"><span className="caption">il y a 3 j · 18,2 k vues</span></Spec>
           <Spec token="--text-eyebrow"><span className="eyebrow">Méthode · 03</span></Spec>
-          <Spec token=".overline · le sur-titre neutre (v0.23.0)"><span className="overline">En un coup d'œil</span><span className="overline text-text-muted">En sourdine</span></Spec>
+          <Spec token=".ds-overline · le sur-titre neutre (v0.24.0 — .overline en v0.23.0)"><span className="ds-overline">En un coup d'œil</span><span className="ds-overline text-text-muted">En sourdine</span></Spec>
+          <Spec token=".overline · alias déprécié, retiré en v0.25.0 — même rendu, et AUCUN trait au-dessus"><span className="overline">Ancien nom</span></Spec>
           <Spec token="--text-chip"><span className="chip text-text-muted">Build</span></Spec>
           <Spec token="--font-mono"><span className="mono text-caption">npm create vite@latest app</span></Spec>
         </Block>

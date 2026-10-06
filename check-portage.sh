@@ -51,9 +51,12 @@ v "menu replié : display posé SEULEMENT à l'ouverture"  src/styles/patterns.c
 v "carte-lien : couleur de carte, focus visible"         src/styles/patterns.css  ".ds-card--link{display:block;color:var(--card-foreground)"
 v "calendrier pleine largeur"                            src/styles/patterns.css  ".ds-cal--fluid .ds-cal__grid{grid-template-columns:repeat(7,minmax(0,1fr))"
 v "typographie de flux, puces rétablies"                 src/styles/patterns.css  ".ds-prose :is(ul,ol){padding-left:var(--space-5);list-style:revert}"
-v "sur-titre neutre, sans pochoir"                       src/styles/tokens/base.css "^.overline{"
+v "sur-titre neutre, sans pochoir — .ds-overline (0.24.0)" src/styles/tokens/base.css "^.ds-overline,.overline{"
 v "ancres sous une barre collante"                       src/styles/tokens/base.css ":root:has(.ds-navbar){scroll-padding-top"
 v "la barre est une porteuse (déduction de surface)"   src/styles/patterns.css  ".ds-navbar .ds-btn--secondary,.ds-navbar .ds-icon-btn--secondary{background:var(--background)}"
+
+echo "── Le lot de la 0.24.0 — noms et accessibilité ──"
+v "l'alias .overline interdit au scanner Tailwind"        src/styles/theme.css       '@source not inline("overline");'
 
 echo "── Le reset ──"
 v "preflight versé dans le dépôt"    src/styles/core.css          "tokens/preflight.css' layer(base)"
@@ -65,5 +68,5 @@ if grep -q -- "--text-" src/styles/app-scale.css; then
 else printf '  ✓ app-scale.css ne retouche aucun palier typo\n'; fi
 
 echo
-if [ "$ko" -eq 0 ]; then echo "✓ portage — les 32 correctifs sont intacts"; exit 0
+if [ "$ko" -eq 0 ]; then echo "✓ portage — les 33 correctifs sont intacts"; exit 0
 else echo "✗ portage — $ko correctif(s) perdu(s). Les rejouer AVANT de taguer."; exit 1; fi
