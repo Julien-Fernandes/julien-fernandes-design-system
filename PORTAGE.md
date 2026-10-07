@@ -36,7 +36,7 @@ celle de personne.)
 Deux endroits :
 
 - `src/styles/brand-<projet>.css` — **les valeurs.** Copie `brand-julien-fernandes.css`
-  sous ce nom et repeins chaque valeur — la copie donne les 54 emplacements dans le bon
+  sous ce nom et repeins chaque valeur — la copie donne les 57 emplacements dans le bon
   ordre, et comme tout est remplacé, rien n'est hérité. Garde le contrat annoté
   `src/styles/brand.template.css` ouvert à côté : il liste chaque jeton et dit ce qu'il
   tient. Puis repointe l'import de `demo/brand-entry.css` sur ton fichier.

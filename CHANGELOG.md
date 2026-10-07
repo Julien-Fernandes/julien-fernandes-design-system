@@ -23,6 +23,58 @@ concordent.
 
 ---
 
+## 0.25.1 — correctif : le mot-marque centré sur son encre
+
+La 0.25.0 a centré la **boîte** du logo dans la barre (−0,01 px). Mais la boîte d'un texte
+est sa boîte de ligne : elle garde, au-dessus des capitales et sous la ligne de base, la place
+des accents et des jambages, vide dans un mot-marque en capitales. Les **lettres** restaient
+donc plus hautes que le centre de la barre.
+
+### Mesures — centre de l'encre des capitales − centre de la barre (Navbar, `?banc=navbar`)
+
+Encre lue au pixel près (rendu à dpr 4, pastille masquée, bords au sous-pixel par couverture).
+
+| Largeur | Chrome avant | Chrome après | WebKit avant | WebKit après |
+|---|---|---|---|---|
+| 390 px | −0,90 px | **+0,10 px** | −0,14 px | **−0,14 px** |
+| 768 px | −0,90 px | **+0,10 px** | −0,14 px | **−0,14 px** |
+| 1280 px | −0,90 px | **+0,10 px** | −0,14 px | **−0,14 px** |
+
+Le repli (sans `text-box`), forcé dans les deux moteurs, donne la même boîte (23,66 px contre
+23,64) et les mêmes écarts. Le burger et le CTA restent centrés : 0,00 px.
+
+### La correction — dans `Logo`, pour toutes les variantes texte
+
+- Le texte est rendu dans un `<span class="ds-logo__text">` rogné par
+  `text-box: trim-both cap alphabetic` : la boîte du logo va du haut des capitales à la ligne
+  de base, c'est-à-dire l'encre. `wordmark`, `monogram` et `stacked` ; pour `stacked`, seuls
+  le haut de la première ligne et le bas de la dernière sont rognés, l'écart entre les lignes
+  ne bouge pas.
+- **Repli** (navigateurs sans `text-box`, Firefox) : la même boîte, par des marges négatives
+  calculées depuis les métriques de la police, en `em`, `lh` et `cap`, donc à toutes les
+  tailles. Les métriques entrent au contrat, § 3, à côté de `--font-display` :
+  `--font-display-ascent` et `--font-display-descent` (hhea ÷ unités par em). Anton :
+  `1.1763em` et `0.3291em`. Laissées vides, pas de repli et rien ne casse.
+- **La pastille** se pose sur la ligne de base : sa marge basse de 0,02em, qui compensait la
+  boîte de ligne, tombe. Avant, elle descendait sous la base de 0,89 px dans Chrome et de
+  0,13 px dans WebKit. Elle est maintenant au même endroit dans les deux.
+- Vérifié sur toute la vitrine (Navbar ×6, Sidebar wordmark et monogram, Footer ×2, en-tête,
+  page Marque) : encre − centre de la boîte entre −0,65 et +0,57 px, contre −1,79 à −0,12
+  avant (mesure à dpr 2). La boîte du logo perd environ 7 % de hauteur (25,3 → 23,6 px dans
+  la barre).
+
+### Migration
+
+**Rien à faire côté apps, sauf monter la version.** Pas d'API qui change. Une app qui pose
+sa propre marque n'a rien à déclarer : les deux métriques vivent dans le fichier de marque du
+paquet. Un client qui écrit la sienne depuis `brand.template.css` les remplit, ou les laisse
+vides.
+
+- `check-portage.sh` : **37 correctifs** (le logo centré sur l'encre entre).
+- Gabarit : porté en 0.11.1.
+
+---
+
 ## 0.25.0 — la Navbar : un burger qui est une icône, une marque centrée, une hauteur qu'on change
 
 Trois corrections du composant `Navbar`, valables pour toute app qui le pose (le site

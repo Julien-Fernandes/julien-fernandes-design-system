@@ -166,12 +166,40 @@ img{max-width:100%;display:block}
    titrage en capitales mais mot-marque en casse mixte — se règle par une ligne
    `.ds-logo{text-transform:none}` dans le fichier de marque. */
 .ds-logo{display:inline-flex;align-items:flex-end;font-family:var(--font-display);font-weight:var(--heading-weight);text-transform:var(--heading-transform);line-height:0.92;letter-spacing:0;white-space:nowrap;color:var(--foreground)}
-/* ⚠️ QUATRE MESURES FIGÉES (taille, deux marges, alignement) — la troisième forme du
+/* LE TEXTE EST CENTRÉ SUR SON ENCRE (v0.25.1). La boîte de ligne d'une police garde, au-
+   dessus des capitales et sous la ligne de base, la place des accents et des jambages — vide
+   dans un mot-marque en capitales. Un parent qui centrait la boîte posait donc les LETTRES
+   trop haut (Anton, Navbar : 0,90 px dans Chrome, 0,14 dans WebKit). `text-box` rogne le
+   texte de la hauteur de capitale à la ligne de base : la boîte du logo EST l'encre.
+   Variante `stacked` : seuls les bords du bloc sont rognés — le haut de la première ligne,
+   le bas de la dernière —, l'écart entre les lignes ne bouge pas. */
+.ds-logo__text{display:block;text-box:trim-both cap alphabetic}
+.ds-logo__text--haut{text-box:trim-start cap alphabetic}
+.ds-logo__text--bas{text-box:trim-end cap alphabetic}
+.ds-logo__text--milieu{text-box:none}
+/* LE REPLI, là où `text-box` manque (Firefox) : la même boîte, obtenue par des marges
+   négatives calculées depuis les MÉTRIQUES DE LA POLICE, que la marque déclare en em
+   (--font-display-ascent / --font-display-descent, § 3 du contrat). Avec une interligne
+   `1lh`, la boîte de ligne dépasse la hauteur de capitale (`1cap`) de
+   (1lh + ascent − descent) / 2 − 1cap en haut, et descend sous la ligne de base de
+   (1lh − ascent + descent) / 2 : ce sont les deux marges retirées. Tout est en em, lh et
+   cap — ça suit la taille. Une marque qui laisse les métriques vides n'a pas de repli :
+   `var()` invalide, marges à 0, la boîte de ligne d'avant. Rien ne casse. */
+@supports not (text-box:trim-both cap alphabetic){
+  .ds-logo__text{margin-block:calc((var(--font-display-descent) - var(--font-display-ascent) - 1lh) / 2 + 1cap) calc((var(--font-display-ascent) - var(--font-display-descent) - 1lh) / 2)}
+  .ds-logo__text--haut{margin-bottom:0}
+  .ds-logo__text--bas{margin-top:0}
+  .ds-logo__text--milieu{margin-block:0}
+}
+/* La pastille est alignée en bas (`align-items:flex-end`) : sa base tombe sur celle de la
+   boîte du texte, c'est-à-dire, depuis v0.25.1, sur la LIGNE DE BASE des lettres. Sa marge
+   basse de 0,02em, qui compensait la boîte de ligne, est tombée.
+   ⚠️ TROIS MESURES FIGÉES (taille, marge, alignement) — la troisième forme du
    défaut de doctrine (PROMPTS.md, en tête) : atteignables par la cascade, mais rien ne
    dit qu'elles sont censées varier — une app qui en veut d'autres les recopie. Candidat
    à une ouverture (jetons ou doc de surcharge), PAS un besoin : un seul appelant, un
    seul contexte — on promeut au deuxième demandeur. */
-.ds-logo__dot{display:inline-block;flex:none;width:0.26em;height:0.26em;border-radius:25%;margin-left:0.08em;margin-bottom:0.02em;background:var(--brand-gradient-diagonal);box-shadow:var(--shadow-logo-dot)}
+.ds-logo__dot{display:inline-block;flex:none;width:0.26em;height:0.26em;border-radius:25%;margin-left:0.08em;margin-bottom:0;background:var(--brand-gradient-diagonal);box-shadow:var(--shadow-logo-dot)}
 /* LA PASTILLE SEULE — `Logo variant="dot"`, v0.21.0 : le point de marque en tête d'un Rail.
    Le même nœud, mais sans mot-marque il n'a plus de corps à suivre : le composant pose le
    font-size à `height`, et la pastille fait 1em — c'est-à-dire exactement la hauteur

@@ -1,6 +1,6 @@
 {
   "name": "@julienfernandes/ds",
-  "version": "0.25.0",
+  "version": "0.25.1",
   "description": "Design system Julien Fernandes — jetons, couche Tailwind v4 et primitives React.",
   "license": "UNLICENSED",
   "private": false,

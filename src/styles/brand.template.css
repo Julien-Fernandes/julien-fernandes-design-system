@@ -10,7 +10,7 @@
      1. `npm run rebrand -- "@vous/ds" "Votre Marque"` — renomme le paquet et l'identité
         textuelle (`src/brand.ts`). Il ne crée AUCUN fichier de marque.
      2. Copiez `src/styles/brand-julien-fernandes.css` en `src/styles/brand-<vous>.css` et
-        repeignez chaque valeur : partir du fichier livré donne les 54 emplacements dans le bon
+        repeignez chaque valeur : partir du fichier livré donne les 57 emplacements dans le bon
         ordre avec leurs commentaires, et comme on remplace toutes les valeurs, on n'hérite
         d'aucune couleur. CE fichier-ci reste le CONTRAT annoté qu'on garde ouvert à côté
         pendant qu'on remplit — il n'est pas le point de départ à recopier.
@@ -43,7 +43,7 @@
    pas la sienne, soit un fichier de marque doit répéter quarante mesures qui ne le regardent
    pas. Les deux régimes tiennent ensemble, pas séparément.
 
-   COMBIEN : 54 jetons OBLIGATOIRES en `:root`, dont AU MOINS 32 à redéclarer en `.dark` —
+   COMBIEN : 57 jetons OBLIGATOIRES en `:root`, dont AU MOINS 33 à redéclarer en `.dark` —
    davantage si votre marque éclaircit ses remplissages en thème sombre. Sept jetons qui
    étaient autrefois à remplir — les deux dégradés de marque et cinq fonds de pilule — sont
    maintenant DÉRIVÉS par le socle dans `tokens/derives.css` et n'ont plus à l'être. Plus
@@ -178,6 +178,12 @@
   --font-display:;  /* @kind font — titres */
   --font-body:;     /* @kind font — texte et UI */
   --font-mono:;     /* @kind font — code, méta technique */
+  /* Métriques de --font-display (v0.25.1), en em : ascendante et descendante de la table
+     `hhea`, divisées par les unités par em (descendante en positif). Elles servent au SEUL
+     repli du logo centré sur l'encre, dans les navigateurs sans `text-box` (Firefox).
+     Laissées vides, pas de repli : là, le logo garde sa boîte de ligne — rien ne casse. */
+  --font-display-ascent:;
+  --font-display-descent:;
 
   /* LE RÉGIME DE TITRAGE — deux jetons, et c'est le réglage qu'on rate le plus souvent.
      Ils gouvernent h1→h4, .display, .display-xl, .ds-card__title et .ds-logo : exactement

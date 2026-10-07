@@ -20,6 +20,12 @@ import { BRAND_MONOGRAM, BRAND_WORDMARK_LINES } from '../../brand';
  *
  * Ne jamais fausse-grasser, contourer ni interlettrer le mot-marque : la casse et la
  * graisse suivent --heading-transform / --heading-weight, comme tout le titrage.
+ *
+ * CENTRÉ SUR L'ENCRE (v0.25.1). Le texte est rendu dans `.ds-logo__text`, rogné de la
+ * hauteur de capitale à la ligne de base (`text-box: trim-both cap alphabetic`) : la boîte
+ * du logo EST l'encre des capitales, et un parent qui la centre centre les lettres — pas
+ * une boîte de ligne qui garde, vide, la place des jambages. La pastille se pose sur la
+ * ligne de base. Repli sans `text-box` (Firefox) : tokens/base.css.
  */
 export interface LogoProps extends HTMLAttributes<HTMLSpanElement> {
   /**
@@ -90,11 +96,18 @@ export function Logo({
   if (variant === 'monogram') {
     return (
       <span className={cn('ds-logo', className)} style={base} aria-label={name} {...rest}>
-        {initials}{mark}
+        <span className="ds-logo__text">{initials}</span>{mark}
       </span>
     );
   }
   if (variant === 'stacked') {
+    /* Seuls les BORDS du bloc sont rognés — le haut de la première ligne, le bas de la
+       dernière : l'écart entre les lignes ne bouge pas. */
+    const n = words.length;
+    const rogne = (i: number) => n === 1 ? 'ds-logo__text'
+      : i === 0 ? 'ds-logo__text ds-logo__text--haut'
+      : i === n - 1 ? 'ds-logo__text ds-logo__text--bas'
+      : 'ds-logo__text ds-logo__text--milieu';
     return (
       <span
         className={cn('ds-logo', className)}
@@ -102,14 +115,14 @@ export function Logo({
         aria-label={name}
         {...rest}
       >
-        {words.slice(0, -1).map((w) => <span key={w}>{w}</span>)}
-        <span style={{ display: 'inline-flex', alignItems: 'flex-end' }}>{words[words.length - 1]}{mark}</span>
+        {words.slice(0, -1).map((w, i) => <span key={w} className={rogne(i)}>{w}</span>)}
+        <span style={{ display: 'inline-flex', alignItems: 'flex-end' }}><span className={rogne(n - 1)}>{words[n - 1]}</span>{mark}</span>
       </span>
     );
   }
   return (
     <span className={cn('ds-logo', className)} style={base} aria-label={name} {...rest}>
-      {words.join(' ')}{mark}
+      <span className="ds-logo__text">{words.join(' ')}</span>{mark}
     </span>
   );
 }

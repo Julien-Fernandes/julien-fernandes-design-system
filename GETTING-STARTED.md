@@ -124,7 +124,7 @@ et comme on repeint chaque valeur, on n'hérite d'aucune couleur. Gardez
 [`src/styles/brand.template.css`](src/styles/brand.template.css) ouvert à côté : **c'est le
 contrat** — il dit ce que chaque jeton doit tenir, et il se suffit à lui-même.
 
-**54 jetons obligatoires** en `:root`, dont **au moins 32** à redéclarer en `.dark`. Plus 3
+**57 jetons obligatoires** en `:root`, dont **au moins 33** à redéclarer en `.dark`. Plus 3
 jetons métier, optionnels, que la plupart des projets ne déclarent pas.
 
 Puis, tout en bas du gabarit, une **§ FACULTATIF** de 33 jetons de **forme** — les sept

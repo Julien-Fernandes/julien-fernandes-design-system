@@ -297,6 +297,10 @@
   --font-display:'Anton','Arial Narrow',Impact,sans-serif;             /* @kind font */
   --font-body:'DM Sans','Helvetica Neue',Helvetica,Arial,sans-serif;   /* @kind font */
   --font-mono:'JetBrains Mono','SFMono-Regular',Consolas,monospace;    /* @kind font */
+  /* Métriques de --font-display, pour le REPLI du logo centré sur l'encre (navigateurs
+     sans `text-box`) — Anton : hhea 2409 / −674 sur 2048 unités. */
+  --font-display-ascent:1.1763em;
+  --font-display-descent:0.3291em;
 
   /* LE RÉGIME DE TITRAGE. Anton est une condensée à capitales : uppercase + 400. Le
      mot-marque est lui aussi en capitales Anton — .ds-logo lit ces jetons et c'est
