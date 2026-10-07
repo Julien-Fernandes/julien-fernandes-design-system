@@ -117,7 +117,7 @@ export function Navbar({
       style={avecMenu ? ({ anchorName: anchor } as CSSProperties) : undefined}
     >
       <div className="page ds-navbar__inner">
-        <a href={homeHref} aria-label={homeLabel}>
+        <a href={homeHref} aria-label={homeLabel} className="ds-navbar__brand">
           {brand ?? <Logo variant="wordmark" letters={letters} height="1.375rem" />}
         </a>
         <nav className="ds-navbar__links">
@@ -128,7 +128,8 @@ export function Navbar({
           {avecMenu ? (cta ? <div className="ds-navbar__cta-main">{cta}</div> : null) : cta}
           {avecMenu ? (
             <IconButton
-              variant="secondary"
+              /* `ghost` (v0.25.0) : une icône nue, sans fond ni bordure au repos. */
+              variant="ghost"
               label={menuLabel}
               className="ds-navbar__burger"
               {...{ [POPOVER_TARGET]: menuId }}

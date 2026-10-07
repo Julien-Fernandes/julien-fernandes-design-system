@@ -70,7 +70,7 @@ couleur, `bg-*`, `w-*`…) — le dégradé meurt en silence. **Sans risque** : 
 (`font-*`, paliers `text-heading`…, `leading-*`). La mise en page va sur un span externe.
 
 **Le sur-titre NEUTRE est `.ds-overline`** (v0.24.0 ; `.overline` en v0.23.0, alias déprécié
-jusqu'à la v0.25.0 — l'ancien nom est aussi celui d'un utilitaire Tailwind, voir PIEGES § 10) :
+au moins jusqu'à la v0.25.0 incluse, retiré au plus tôt en v0.26.0 — l'ancien nom est aussi celui d'un utilitaire Tailwind, voir PIEGES § 10) :
 le gabarit exact d'`.eyebrow` (taille,
 graisse, capitales, interlettrage), sans le pochoir — il rend en `currentColor`, donc un
 utilitaire de couleur posé dessus (`text-muted-foreground`) fait ce qu'il dit, et il n'est
@@ -1011,10 +1011,37 @@ scroll : teinte + blur + ombre. C'est le SEUL endroit du système qui emploie
   ```tsx
   document.addEventListener('click', e => (e.target as Element).closest('.ds-navbar__menu a')?.closest<HTMLElement>('[popover]')?.hidePopover());
   ```
-- **Un bouton secondaire dans la barre** (un « Retour », le burger) prend `--background`
-  par déduction de surface (v0.23.0) : la barre est une porteuse, comme la carte.
+- **Un bouton secondaire dans la barre** (un « Retour ») prend `--background` par
+  déduction de surface (v0.23.0) : la barre est une porteuse, comme la carte.
+- **Le burger est une icône nue** (v0.25.0) : `IconButton` `ghost` — ni fond ni bordure au
+  repos, `--surface-alt` au survol, l'anneau de focus du système au clavier. Sa cible fait
+  `--control-md` (44 px sous 64rem, 48 au-dessus) ; le glyphe est aligné optiquement sur
+  le bord droit du contenu. Nom accessible (`menuLabel`), état « développé » et lien vers
+  le panneau inchangés (tenus par le `popover` natif).
+- **La marque est centrée dans la barre, quelle qu'elle soit** (v0.25.0) : le lien
+  d'accueil (`.ds-navbar__brand`) est en `inline-flex` centré. Avant, il contenait une
+  ligne de texte et la marque s'y posait sur la ligne de base : 2,85 px trop haut pour le
+  Logo par défaut, 3,50 px pour un SVG + texte. Après : 0,00. Ne recentrez pas la marque à
+  la main (`translate`, `margin-top`) — retirez tout recentrage écrit pour l'ancienne
+  version.
 - **Les ancres ne passent plus sous la barre** (v0.23.0) : dès qu'une `.ds-navbar` est
   dans la page, la racine reçoit `scroll-padding-top` = `--navbar-h` + `--space-4`.
+- **Changer la hauteur de la barre** : redéclarer `--navbar-h` dans la feuille de l'app,
+  **hors de toute couche**, après les imports du DS. TOUT suit : la barre, le haut du
+  panneau du menu replié, le `scroll-padding-top` des ancres (vérifié sur le banc :
+  72 → 64 px, panneau collé, 88 → 80 px).
+
+  ```css
+  /* src/styles/global.css de l'app — HORS de tout @layer */
+  :root { --navbar-h: 4rem; }
+  ```
+
+  ⚠️ Posée dans un `@layer` (`@layer components { :root { … } }`), la redéclaration est
+  **ignorée en silence** : les jetons du socle sont hors couche, et une déclaration hors
+  couche bat toutes les couches. Voir PIEGES § 11. Une marque peut aussi la poser dans
+  son fichier (§ FACULTATIF du contrat).
+- **Le banc** : `?banc=navbar` dans la vitrine — une barre réelle, avec les mesures en
+  direct.
 - États rendus : repos, scrollée, lien au repos / survolé / actif, menu replié fermé /
   ouvert.
 

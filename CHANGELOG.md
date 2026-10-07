@@ -23,6 +23,123 @@ concordent.
 
 ---
 
+## 0.25.0 — la Navbar : un burger qui est une icône, une marque centrée, une hauteur qu'on change
+
+Trois corrections du composant `Navbar`, valables pour toute app qui le pose (le site
+public aujourd'hui). Aucune API ne change ; deux rendus bougent, écrits ci-dessous.
+
+### ⚠ Ce qui change à l'écran chez QUI monte de version
+
+| Ce qui bouge | Avant (0.24.0) | Après |
+|---|---|---|
+| **Le burger du menu replié** | `IconButton` `secondary` : fond `--background`, bordure 1,5 px, carré de 42 px | `IconButton` **`ghost`** : ni fond ni bordure au repos, `--surface-alt` au survol, même anneau de focus ; cible de **`--control-md`** (44 px sous 64rem, 48 au-dessus) ; glyphe aligné sur le bord droit du contenu |
+| **La marque dans la barre** | 2,85 px trop haut (Logo par défaut), 3,50 px (SVG + texte) | **centrée** : 0,00 px |
+
+Creator, Dashboard et Editing ne posent pas de `Navbar` : rien ne bouge chez eux.
+
+### 1 · Le burger devient une icône
+
+`IconButton` avait déjà la variante qu'il fallait — `ghost`, transparente, survol en
+`--surface-alt` : le burger la prend, aucun style ad hoc. Deux réglages propres à la
+barre, dans `.ds-navbar__burger` : la cible passe au rail tactile `--control-md` (le carré
+d'`IconButton`, `--icon-control-md`, faisait 42 px — sous les 44 de la cible tactile), le
+glyphe passe à 1.375rem (22 px, au lieu des 18 du créneau md : traits plus longs et plus
+espacés, lisibles sans fond), et
+une marge négative rend au bord droit du contenu la moitié du vide qui entoure le glyphe :
+le glyphe tombe sur le bord où finissent les liens et le CTA au-dessus de 64rem (mesuré :
+0,00 px), la cible déborde dans la gouttière. Nom accessible (`menuLabel`), état
+« développé » (exposé par le `popover` natif : `expanded: true` dans l'arbre de Chrome),
+Entrée, Échap et focus rendu : inchangés.
+
+### 2 · La marque est centrée — la cause, et la correction
+
+**Diagnostic.** Le lien d'accueil était un `<a>` sans règle. Élément flex de la barre, il
+devenait un bloc qui contenait une **ligne de texte** (interligne du corps, 1,5) ; la
+marque — `inline-flex` pour le Logo, `inline` pour une image ou un SVG — s'y posait sur la
+**ligne de base**, avec la place des jambages réservée dessous. Le lien était centré dans
+la barre (écart 0) ; son contenu, non : lien de 31 px pour un Logo de 25,3 px.
+
+**Correction.** Le lien porte `.ds-navbar__brand` : `inline-flex`, `align-items:center`.
+Sans ligne de texte, sa hauteur est celle de la marque, et la marque est centrée quelle
+qu'elle soit. `color:inherit` au passage : une marque en texte nu ne prend plus la couleur
+des liens.
+
+**Mesures** (centre de la marque − centre de la barre, `getBoundingClientRect`, banc
+`?banc=navbar`) :
+
+| Largeur | Logo par défaut, avant → après | Marque SVG + texte, avant → après |
+|---|---|---|
+| 390 px | −2,85 → **−0,01** | −3,50 → **0,00** |
+| 768 px | −2,85 → **−0,01** | −3,50 → **0,00** |
+| 1280 px | −2,85 → **−0,01** | −3,50 → **0,00** |
+
+(−0,01 : l'arrondi sous-pixel de la mise en page — barre de 72, marque de 25,3.)
+
+### 3 · `--navbar-h` : la valeur par défaut reste 72 px, une app la change proprement
+
+Vérifié sur le banc, avec la redéclaration posée comme une app la pose (une règle `:root`
+dans une feuille chargée après le DS) : **tout suit**.
+
+| | `--navbar-h` 4.5rem (défaut) | `:root { --navbar-h: 4rem }` |
+|---|---|---|
+| hauteur de la barre | 72 px | 64 px |
+| haut du panneau ouvert − bas de la barre | 0,00 px | 0,00 px |
+| `scroll-padding-top` de la racine | 88 px | 80 px |
+| titre d'une ancre suivie, sous la barre | 15 px | 15 px |
+| marque · burger, écart au centre | −0,01 · 0,00 | −0,01 · 0,00 |
+
+**Un piège trouvé en le vérifiant, et documenté (PIEGES § 11)** : la même redéclaration
+posée DANS un `@layer` est ignorée en silence — 72 px au lieu de 64, mesuré pour
+`@layer components` et `@layer base`. Les jetons du socle sont hors couche, et une
+déclaration hors couche bat toutes les couches.
+
+### Accessibilité — aucune régression
+
+axe-core (règles WCAG 2.0/2.1/2.2 A et AA + bonnes pratiques) sur la barre, à 390 px,
+rejoué **à l'identique sur la v0.24.0 et sur la v0.25.0** : menu fermé, 16 règles passées,
+0 violation ; menu ouvert, 16 règles passées, 1 violation — `color-contrast` sur le lien
+actif du panneau (`--active` sur `--secondary`, 3,28:1), **la même dans les deux
+versions** : c'est l'écart assumé par la marque depuis la v0.21.0 (`@a11y-assume
+.ds-navlink.is-active`), pas une régression. Clavier vérifié : Tab jusqu'au burger,
+anneau visible, Entrée ouvre, Échap ferme et rend le focus.
+
+### Migration
+
+**Rien d'obligatoire.** Aucune prop ne change, aucune classe ne disparaît.
+
+- **Si votre app recentrait la marque à la main** (un `translate`, un `margin-top` sur le
+  lien ou le logo de la barre), retirez-le : il décalerait maintenant dans l'autre sens.
+- **Changer la hauteur de la barre** — dans la feuille de l'app, **hors de tout
+  `@layer`**, après les imports du DS :
+
+  ```css
+  :root { --navbar-h: 4rem; }
+  ```
+
+  La barre, le haut du panneau du menu replié et le `scroll-padding-top` des ancres
+  suivent. Dans un `@layer`, la ligne ne fait rien (PIEGES § 11). Une marque peut aussi
+  la poser dans son fichier (§ FACULTATIF du contrat).
+
+### Le reste
+
+- **L'alias `.overline` est maintenu** dans cette version, contrairement à ce qu'annonçait
+  la v0.24.0 : retrait au plus tôt en v0.26.0, avec l'interdiction `@source not inline`
+  de `theme.css`, et annoncé. Les mentions (README, PROMPTS, PIEGES, `theme.css`,
+  `base.css`, vitrine) sont corrigées.
+- **Le banc de la Navbar** : `?banc=navbar` dans la vitrine — une barre réelle, pleine
+  largeur et collante, menu replié, ancres, marque par défaut ou personnalisée (SVG en
+  ligne + texte), et l'interrupteur qui redéclare `--navbar-h` comme une app ; les mesures
+  s'y lisent en direct. Lié depuis la page Navigation.
+- Docs : PROMPTS (Navbar : burger, centrage, hauteur), PIEGES § 11 nouveau.
+- `check-portage.sh` : **36 correctifs** (trois entrent : le lien de marque, la cible du
+  burger, la variante `ghost`), recomptés.
+- Gabarit : porté en **0.11.0** — comportement et accessibilité de la barre, le banc, le
+  piège § 11 ; son alias `.overline` est maintenu de la même façon.
+
+**Aucune rupture.** 39 composants, 48 glyphes, quatorze gardes.
+
+---
+
 ## 0.24.0 — quatre manques remontés par le site : un nom, une grille, un câblage, des glyphes
 
 Quatre manques génériques, remontés par le site public après sa montée en v0.23.0, chacun

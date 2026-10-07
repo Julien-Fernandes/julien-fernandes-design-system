@@ -8,9 +8,14 @@ import { createRoot } from 'react-dom/client';
 import 'virtual:ds-entry';
 import './styles.css';
 import { App } from './App';
+import { BancNavbar } from './pages/BancNavbar';
+
+/* `?banc=navbar` ouvre le banc de la Navbar, une page à part (v0.25.0) : une barre se
+   mesure dans la page qu'elle tient, pleine largeur et collante, pas dans une carte. */
+const banc = new URLSearchParams(location.search).get('banc');
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {banc === 'navbar' ? <BancNavbar /> : <App />}
   </StrictMode>,
 );

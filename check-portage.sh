@@ -58,6 +58,11 @@ v "la barre est une porteuse (déduction de surface)"   src/styles/patterns.css 
 echo "── Le lot de la 0.24.0 — noms et accessibilité ──"
 v "l'alias .overline interdit au scanner Tailwind"        src/styles/theme.css       '@source not inline("overline");'
 
+echo "── Le lot de la 0.25.0 — la Navbar ──"
+v "lien de marque centré (inline-flex, plus de ligne de base)" src/styles/patterns.css ".ds-navbar__brand{display:inline-flex;align-items:center"
+v "burger : cible du rail tactile, alignement optique"         src/styles/patterns.css ".ds-navbar__burger{display:none;width:var(--control-md);height:var(--control-md)"
+v "burger en IconButton ghost"                                src/components/navigation/Navbar.tsx 'variant="ghost"'
+
 echo "── Le reset ──"
 v "preflight versé dans le dépôt"    src/styles/core.css          "tokens/preflight.css' layer(base)"
 v "couleur de bordure par défaut"    src/styles/tokens/base.css   "border-color:var(--border,currentColor)"
@@ -68,5 +73,5 @@ if grep -q -- "--text-" src/styles/app-scale.css; then
 else printf '  ✓ app-scale.css ne retouche aucun palier typo\n'; fi
 
 echo
-if [ "$ko" -eq 0 ]; then echo "✓ portage — les 33 correctifs sont intacts"; exit 0
+if [ "$ko" -eq 0 ]; then echo "✓ portage — les 36 correctifs sont intacts"; exit 0
 else echo "✗ portage — $ko correctif(s) perdu(s). Les rejouer AVANT de taguer."; exit 1; fi

@@ -367,7 +367,7 @@ remonté.
 utilitaire de marque historique — `.ds-overline` depuis la v0.24.0. Un ancien nom ne
 survit qu'en **alias, une version**, et seulement si `theme.css` interdit au scanner de
 générer le candidat natif (`@source not inline("overline")`) : c'est le cas de `.overline`
-jusqu'à la v0.25.0. **Côté app** : écrire `ds-overline`, et retirer tout
+au moins jusqu'à la v0.25.0 incluse (retrait au plus tôt en v0.26.0). **Côté app** : écrire `ds-overline`, et retirer tout
 `@source not inline('overline')` posé à la main — `theme.css` le porte.
 
 **Le garde.** `check-utility-collisions.mjs`, seconde famille (v0.24.0) : il compile
@@ -377,6 +377,48 @@ chaque classe déclarée par le CSS du socle ; une règle produite = un nom pris
 lieu de la recopier, et rejoue son jumeau de falsification à chaque appel (`flex` et
 `overline` doivent être reconnus, `ds-overline` et `eyebrow` libres). Retirer la ligne
 `@source not inline` de `theme.css` le fait tomber — vérifié.
+
+---
+
+## 11 · Un jeton du socle redéclaré DANS une couche ne fait rien
+
+**Ce qui casse.** Les jetons du socle (`--navbar-h`, `--control-md`, `--cal-day`…) sont
+déclarés **hors couche** (`core.css` les importe avant toute `@layer`, voir son en-tête).
+Une app qui en change un dans sa feuille l'écrit souvent là où elle range tout le reste :
+
+```css
+@layer components {
+  :root { --navbar-h: 4rem; }   /* IGNORÉ */
+}
+```
+
+Or une déclaration hors couche bat **toutes** les couches, quelle que soit la
+spécificité. La redéclaration perd : la barre reste à 72 px. Mesuré sur le banc de la
+Navbar (v0.25.0) : `:root{--navbar-h:4rem}` hors couche → 64 px ; la même règle dans
+`@layer components` ou `@layer base` → 72 px.
+
+**Pourquoi la panne est muette.** La règle est valide, l'inspecteur l'affiche — barrée,
+sans raison visible au premier coup d'œil. Rien ne casse : la valeur du socle s'applique,
+qui est une valeur plausible.
+
+**La parade.** Redéclarer un jeton du socle **hors de tout `@layer`**, dans la feuille de
+l'app, après les imports du DS :
+
+```css
+/* global.css de l'app */
+@import '@julienfernandes/ds/theme.css';
+:root { --navbar-h: 4rem; }          /* hors couche : elle gagne */
+@layer components { /* … les styles de l'app … */ }
+```
+
+(Une MARQUE redéclare ses jetons de forme dans son propre fichier, lui aussi hors couche :
+c'est le § FACULTATIF du contrat.)
+
+**Le garde.** Aucun : la règle fautive vit dans le code de l'app, et une redéclaration en
+couche peut être voulue ailleurs (un thème local qui ne doit PAS gagner).
+
+> *Admission :* la cause est le placement hors couche des jetons dans `core.css`, **dans
+> le paquet** — c'est ce qui fait perdre la redéclaration. Le critère passe.
 
 ---
 

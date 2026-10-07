@@ -49,7 +49,8 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
-/* L'ALIAS DÉPRÉCIÉ `.overline` — v0.24.0, À RETIRER EN v0.25.0.
+/* L'ALIAS DÉPRÉCIÉ `.overline` — v0.24.0. Annoncé partant en v0.25.0, il y est MAINTENU
+   (décision du lot) : retrait au plus tôt en v0.26.0, avec cette ligne, et annoncé.
    Le sur-titre neutre s'appelle `.ds-overline`. Son ancien nom, `.overline`, est celui
    d'un utilitaire statique de Tailwind (`text-decoration-line: overline`) : tant que
    l'alias vit, on interdit au scanner de générer ce candidat, sinon l'utilitaire —

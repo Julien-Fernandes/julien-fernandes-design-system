@@ -58,7 +58,7 @@ gabarit, dont la marque d'exemple est froide et n'est celle de personne.)
 Pas de registry : chaque app épingle une version par un tag git.
 
 ```bash
-npm i github:Julien-Fernandes/julien-fernandes-design-system#v0.24.0
+npm i github:Julien-Fernandes/julien-fernandes-design-system#v0.25.0
 ```
 
 Cinq **peer dependencies**, à la charge de l'app :
@@ -262,7 +262,7 @@ de Tailwind, sur laquelle reposent les composants shadcn de ton app.
 > ```
 
 `tokens/base.css` fournit aussi des classes prêtes à l'emploi : `.display` `.display-xl` `.eyebrow`
-`.ds-overline` (le sur-titre neutre, v0.24.0 — `.overline` en alias déprécié jusqu'à la v0.25.0) `.chip` `.accent` `.mono` `.caption` `.prose` `.halo`
+`.ds-overline` (le sur-titre neutre, v0.24.0 — `.overline` en alias déprécié, retiré au plus tôt en v0.26.0) `.chip` `.accent` `.mono` `.caption` `.prose` `.halo`
 (+ `.halo--wide` / `.halo--contained`, v0.23.0) `.page` `.ds-logo`. Et `patterns.css` la
 typographie de flux **`.ds-prose`** (v0.23.0) : posée sur le conteneur d'un texte suivi —
 rendu Markdown, page légale —, elle en règle titres, paragraphes, listes, liens, code et
